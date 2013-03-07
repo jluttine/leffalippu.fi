@@ -1,5 +1,11 @@
 *.py[cod]
 
+# Sqliate database
+*.sqlite
+
+# Ignore South files
+migrations
+
 # C extensions
 *.so
 
