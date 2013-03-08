@@ -1,5 +1,8 @@
 *.py[cod]
 
+# Ignore swap files
+*~
+
 # Sqliate database
 *.sqlite
 
