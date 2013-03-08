@@ -36,7 +36,7 @@ class OrderManager(models.Manager):
         pass
 
 
-class Order(model.Model):
+class Order(models.Model):
     """
     Class for handling orders of tickets.
 
@@ -52,8 +52,8 @@ class Order(model.Model):
     """ Email address of the customer """
     email = models.EmailField()
     # For bitcoin payment
-    public_address 
-    private_key
+    public_address = models.CharField(max_length=100, unique=True)
+    private_key = models.CharField(max_length=100, unique=True)
     
     # Status: open -> expired/cancelled/paid
     OPEN = 'O'
@@ -83,21 +83,24 @@ class Order(model.Model):
     def pay(self):
         pass
 
-class TicketType(model.Model):
+class TicketType(models.Model):
     """
     A class for types of tickets.
     """
     
     """ Short name of the ticket """
-    name = models.CharField(primary_key=True)
+    name = models.CharField(max_length=100, primary_key=True)
     
     """ Long description of the ticket and how to use """
     description = models.TextField()
     
-    """ Price of the ticket in cents """
+    """ Original price of the ticket in cents """
     price = models.PositiveIntegerField()
 
-class Ticket(model.Model):
+    """ Fee for the seller in cents """
+    fee = models.PositiveIntegerField()
+
+class Ticket(models.Model):
     """
     Class for a ticket.
 
@@ -115,4 +118,4 @@ class Ticket(model.Model):
     tyyppi = models.ForeignKey(TicketType)
 
     """ Serial number or other identification code """
-    number = models.CharField()
+    number = models.CharField(max_length=100)
