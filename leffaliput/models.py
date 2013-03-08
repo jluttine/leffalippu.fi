@@ -119,3 +119,6 @@ class Ticket(models.Model):
 
     """ Serial number or other identification code """
     number = models.CharField(max_length=100)
+
+    """ Last valid day of the ticket """
+    expires = models.DateField()
