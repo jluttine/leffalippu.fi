@@ -157,3 +157,9 @@ LOGGING = {
         },
     }
 }
+
+# Use local settings to overwrite these
+try:
+    execfile(path('local_settings.py'))
+except IOError:
+    pass

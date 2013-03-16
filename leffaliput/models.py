@@ -50,7 +50,7 @@ class Order(models.Model):
     """ Timestamp of the order """
     date = models.DateTimeField(auto_now_add=True)
     """ Email address of the customer """
-    email = models.EmailField()
+    email = models.EmailField() # maybe optional but recommended?
     # For bitcoin payment
     public_address = models.CharField(max_length=100, unique=True)
     private_key = models.CharField(max_length=100, unique=True)
