@@ -1,6 +1,6 @@
 #!/bin/sh
 
-./manage.py syncdb
+./manage.py syncdb --all
 ./manage.py schemamigration leffaliput --initial
-./manage.py migrate leffaliput --fake
+./manage.py migrate --fake
 
