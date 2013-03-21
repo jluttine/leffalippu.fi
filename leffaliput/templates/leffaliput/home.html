@@ -2,5 +2,104 @@
 
 {% block content %}
     <h1>Leffaliput edullisesti</h1>
+
+    <h2>Kaikki liput:</h2>
+    <table>
+      <thead>
+        <tr>
+          <td>Lipun nimi</td>
+          <td>Lipun osto</td>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ticket in ticket_list %}
+        <tr>
+          <td>{{ ticket.category.name }}</td>
+          <td>{{ ticket.transaction }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h2>Maksamattomat varaukset:</h2>
+    {% for reservation in reservation_list %}
+    Varaus: {{ reservation }}
+    <ul>
+      {% for reservedtickets in reservation.reservedtickets_set.all %}
+      <li>{{ reservedtickets.category }} {{ reservedtickets.amount }}kpl</li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+
+    <h2>Maksetut ostokset:</h2>
+    {% for transaction in transaction_list %}
+    Osto: {{ transaction }}
+    <ul>
+      {% for reservedtickets in transaction.reservation.reservedtickets_set.all %}
+      <li>{{ reservedtickets.category }} {{ reservedtickets.amount }}kpl</li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+
+    <h2>Lippuja saatavilla:</h2>
+    <table>
+      <thead>
+        <tr>
+          <td>Lipun nimi</td>
+          <td>Vapaiden määrä</td>
+          <td>Hinta</td>
+        </tr>
+      </thead>
+      <tbody>
+        {% for category in category_list %}
+        <tr>
+          <td>{{ category.name }}</td>
+          <td>{{ category.amount_available }}</td>
+          <td>{{ category.price }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h2>Osta lippuja:</h2>
+
+    <form method="post" action="">
+      {% csrf_token %}
+      {{ reservation_form.non_field_errors }}
+      <div class="fieldWrapper">
+        <label for="id_email">Sähköposti:</label>
+        {{ reservation_form.email }} {{ reservation_form.email.errors }}
+      </div>
+      {{ category_formset.management_form }}
+      <table>
+        <thead>
+          <tr>
+            <th>Lippu</th>
+            <th>Hinta</th>
+            <th>Määrä</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for form in category_formset %}
+          <tr>
+            <td>{{ form.category.value }} {{ form.category }}</td>
+            <td>{{ form.instance.category.price }}{{ form.fields.category.initial.price }}</td>
+            <td>{{ form.amount }}</td>
+            <td>{{ form.amount.errors }}{{ form.non_field_errors }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Yhteensä</td>
+          </tr>
+        </tfoot>
+      </table>
+      <input type="submit" value="Osta liput" />
+    </form>
+
+
+    
+    
 {% endblock %}
 

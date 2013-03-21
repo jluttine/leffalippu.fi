@@ -17,7 +17,29 @@
 Models for `leffaliput`.
 """
 
+# NO! Don't reserve specific tickets when buying! Just reserve the
+# amounts and reserve the specific tickets when paid. Otherwise people
+# could first reserve tickets, then buy other tickets with more
+# expiration time and then cancel the previous ones.
+
 from django.db import models
+
+## class Product(models.Model):
+##     name = models.CharField(max_length=100, primary_key=True)
+##     price = models.PositiveIntegerField()
+    
+## class Order(models.Model):
+##     email = models.EmailField()
+##     products = models.ManyToManyField(Product, through='OrderedProduct')
+
+## class OrderedProduct(models.Model):
+##     product = models.ForeignKey(Product)
+##     order = models.ForeignKey(Order)
+##     quantity = models.PositiveIntegerField()
+    
+
+
+
 
 class OrderManager(models.Manager):
 
@@ -35,21 +57,48 @@ class OrderManager(models.Manager):
         pass
 
 
-class Order(models.Model):
+class Category(models.Model):
     """
-    Class for handling orders of tickets.
+    A class for types of tickets.
 
-    When an order is created, it is open until it either expires, is
-    cancelled or is paid. Tickets are kept reserved for the order
-    until it either expires or is cancelled.
+    For instance, you can have categories such as "BioRex student
+    ticket", "Finnkino ticket" etc.
+    """
+    
+    """ Short name of the ticket """
+    name = models.CharField(max_length=100, primary_key=True)
+    
+    """ Long description of the ticket and how to use """
+    description = models.TextField()
+    
+    """ Current selling price of the tickets in cents """
+    price = models.PositiveIntegerField()
+
+    def __unicode__(self):
+        return self.name
+
+class Reservation(models.Model):
+    """
+    Class for handling ordering of tickets.
+
+    When an reservation is created, it is open until it either
+    expires, is cancelled or is paid. Tickets should be kept reserved
+    for the reservation until it either expires or is cancelled.
     """
 
-    """ Id of the order used in URL """
-    key = models.CharField(max_length=20, primary_key=True)
-    """ Timestamp of the order """
+    #""" Id of the order used in URL """
+    #key = models.CharField(max_length=20, primary_key=True)
+    
+    """ Timestamp of the order placement """
     date = models.DateTimeField(auto_now_add=True)
+    
     """ Email address of the customer """
-    email = models.EmailField() # maybe optional but recommended?
+    email = models.EmailField()
+    
+    """ IP address from where the reservation was made """
+    ip = models.GenericIPAddressField(null=True,
+                                      blank=True)
+    
     # For bitcoin payment
     public_address = models.CharField(max_length=100, unique=True)
     private_key = models.CharField(max_length=100, unique=True)
@@ -70,9 +119,9 @@ class Order(models.Model):
                               choices=STATUS_CHOICES,
                               default=OPEN)
 
-    # Use custom manager?
-    objects = OrderManager()
-
+    """ The content of the reservation """
+    tickets = models.ManyToManyField(Category, through='ReservedTickets')
+    
     def cancel(self):
         pass
 
@@ -82,42 +131,76 @@ class Order(models.Model):
     def pay(self):
         pass
 
-class TicketType(models.Model):
+    def __unicode__(self):
+        return "%s %s %s" % (self.email, self.date, self.status)
+
+class ReservedTickets(models.Model):
     """
-    A class for types of tickets.
+    Intermediate class for specifying the amount of tickets in a reservation
     """
-    
-    """ Short name of the ticket """
-    name = models.CharField(max_length=100, primary_key=True)
-    
-    """ Long description of the ticket and how to use """
-    description = models.TextField()
-    
-    """ Original price of the ticket in cents """
+
+    """ Reservation for which the tickets belong to """
+    reservation = models.ForeignKey(Reservation)
+
+    """ Category of the tickets """
+    category = models.ForeignKey(Category)
+
+    """ Amount of reserved tickets of this type. """
+    amount = models.PositiveIntegerField()
+
+    # It is good to store the price that was agreed upon just in case
+    # the price of the tickets is changed in the database in the
+    # future
+    """ Total price per ticket """
     price = models.PositiveIntegerField()
 
-    """ Fee for the seller in cents """
-    fee = models.PositiveIntegerField()
+    class Meta:
+        unique_together = (("reservation", "category"),)
+
+class Transaction(models.Model):
+    """
+    Class for handling payments of tickets.
+    """
+
+    """ The reservation which lead to this payment """
+    reservation = models.OneToOneField(Reservation, primary_key=True)
+
+    """ Timestamp of the payment """
+    date = models.DateTimeField(auto_now_add=True)
+
+    # Note: Tickets belonging to this transaction are defined by
+    # ForeignKey in Ticket class.
+
+    # Use custom manager?
+    #objects = OrderManager()
+
+    def __unicode__(self):
+        return "%s %s" % (self.date, self.reservation)
 
 class Ticket(models.Model):
     """
-    Class for a ticket.
+    A movie ticket.
 
-    A ticket may be reserved/buyed or available.
+    The ticket may be either available or buyed.
     """
 
-    """ The order for which this ticket is reserved or used (if any) """
-    order = models.ForeignKey(Order, 
-                              blank=True,
-                              null=True,
-                              on_delete=models.SET_NULL,
-                              related_name='tickets')
+    """ The order for which this ticket was bought (if any) """
+    transaction = models.ForeignKey(Transaction,
+                                    blank=True,
+                                    null=True,
+                                    on_delete=models.SET_NULL)
+
+    """ Price we paid to the movie theater """
+    price = models.PositiveIntegerField()
 
     """ Type of the ticket """
-    tyyppi = models.ForeignKey(TicketType)
+    category = models.ForeignKey(Category)
 
     """ Serial number or other identification code """
     number = models.CharField(max_length=100)
 
     """ Last valid day of the ticket """
     expires = models.DateField()
+
+    def __unicode__(self):
+        return "%s (%s)" % (self.number, self.category)

@@ -21,6 +21,17 @@ Admin for `leffaliput`.
 from django.contrib import admin
 from leffaliput import models 
 
+class ReservedTicketsInline(admin.TabularInline):
+    model = models.ReservedTickets
+    extra = 1
+    #model = models.Reservation.tickets.through
+
+class ReservationAdmin(admin.ModelAdmin):
+    inlines = (ReservedTicketsInline,)
+    
+
 admin.site.register(models.Ticket)
-admin.site.register(models.Order)
-admin.site.register(models.TicketType)
+admin.site.register(models.Transaction)
+admin.site.register(models.Category)
+admin.site.register(models.Reservation, ReservationAdmin)
+admin.site.register(models.ReservedTickets)
