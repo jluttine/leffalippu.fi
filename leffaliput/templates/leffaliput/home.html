@@ -84,7 +84,12 @@
           <tr>
             <td>{{ form.category.value }} {{ form.category }}</td>
             <td>{{ form.instance.category.price }}{{ form.fields.category.initial.price }}</td>
-            <td>{{ form.amount }}</td>
+            {# <td>{{ form.amount }}</td> #}
+            <td>
+            <input type="button" value="+" class="qtyplus" field="{{ form.amount.html_name }}" />
+            <input type="text" name="{{ form.amount.html_name }}" value="{{ form.amount.value }}" class="qty" maxlength="1" />
+            <input type="button" value="-" class="qtyminus" field="{{ form.amount.html_name }}" />
+            </td>
             <td>{{ form.amount.errors }}{{ form.non_field_errors }}</td>
           </tr>
           {% endfor %}
@@ -99,7 +104,52 @@
     </form>
 
 
-    
-    
+<form id="myform" method="POST" action="#">
+</form>
+
 {% endblock %}
 
+{% block javascript %}
+<script>
+   // This button will increment the value
+    $(".qtyplus").click(function(e){
+        // Stop acting like a button
+        e.preventDefault();
+        // Get the field name
+        fieldName = $(this).attr('field');
+        // Get its current value
+        var currentVal = parseInt($('input[name='+fieldName+']').val());
+        // If is not undefined
+        if (!isNaN(currentVal)) {
+            // and it's less than the max value
+            if (currentVal < 6) {
+              // Increment
+              $('input[name='+fieldName+']').val(currentVal + 1);
+            } else {
+              $('input[name='+fieldName+']').val(6);
+            }
+        } else {
+            // Otherwise put a 0 there
+            $('input[name='+fieldName+']').val(0);
+        }
+    });
+    // This button will decrement the value till 0
+    $(".qtyminus").click(function(e) {
+        // Stop acting like a button
+        e.preventDefault();
+        // Get the field name
+        fieldName = $(this).attr('field');
+        // Get its current value
+        var currentVal = parseInt($('input[name='+fieldName+']').val());
+        // If it isn't undefined or its greater than 0
+        if (!isNaN(currentVal) && currentVal > 0) {
+            // Decrement one
+            $('input[name='+fieldName+']').val(currentVal - 1);
+        } else {
+            // Otherwise put a 0 there
+            $('input[name='+fieldName+']').val(0);
+        }
+    });
+</script>
+
+{% endblock %}

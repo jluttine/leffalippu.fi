@@ -1,14 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html class="fuelux">
   <head>
-    <title>{% block title %}Leffaliput.fi - Edullisesti elokuviin{% endblock %}</title>
+    <title>{% block title %}Leffaliput.fi - Osta elokuvalippuja edullisesti{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{{ STATIC_URL }}css/bootstrap.min.css" rel="stylesheet" media="screen">
+    {# <link href="{{ STATIC_URL }}css/jquery-ui.css" rel="stylesheet" media="screen"> #}
+    {# <link href="{{ STATIC_URL }}css/fuelux.min.css" rel="stylesheet" media="screen"> #}
+
+    {# <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" /> #}
+
   </head>
   <body>
     {% block content %}
     {% endblock %}
-    <script src="http://code.jquery.com/jquery.js"></script>
+
+    {# Codes: http://code.jquery.com/ #}
+    {# <script src="http://code.jquery.com/jquery.js"></script> #}
+    {# <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script> #}
+    {# <script src="{{ STATIC_URL }}js/jquery-1.9.1.min.js"></script> #}
+    {# <script src="{{ STATIC_URL }}js/jquery-ui.min.js"></script> #}
+    {# <script src="{{ STATIC_URL }}js/all.min.js"></script> #}
+
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+
+    {# <script src="/resources/demos/external/jquery.mousewheel.js"></script> #}
+    {# <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script> #}
+
     <script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
+    {# <script src="{{ STATIC_URL }}js/loader.min.js"></script> #}
+    {% block javascript %}
+    {% endblock %}
+
   </body>
 </html>
