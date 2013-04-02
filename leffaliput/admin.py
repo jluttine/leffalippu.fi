@@ -28,10 +28,17 @@ class ReservedTicketsInline(admin.TabularInline):
 
 class ReservationAdmin(admin.ModelAdmin):
     inlines = (ReservedTicketsInline,)
+
+class TicketInline(admin.TabularInline):
+    model = models.Ticket
+    extra = 10
+
+class CategoryAdmin(admin.ModelAdmin):
+    inlines = (TicketInline,)
     
 
 admin.site.register(models.Ticket)
 admin.site.register(models.Transaction)
-admin.site.register(models.Category)
+admin.site.register(models.Category, CategoryAdmin)
 admin.site.register(models.Reservation, ReservationAdmin)
 admin.site.register(models.ReservedTickets)

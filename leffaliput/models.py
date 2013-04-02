@@ -24,6 +24,8 @@ Models for `leffaliput`.
 
 from django.db import models
 
+from django.db.models import Count, Sum, Q
+
 ## class Product(models.Model):
 ##     name = models.CharField(max_length=100, primary_key=True)
 ##     price = models.PositiveIntegerField()
@@ -38,7 +40,20 @@ from django.db import models
 ##     quantity = models.PositiveIntegerField()
     
 
+class CategoryManager(models.Manager):
 
+    def OLD_with_amount_available(self):
+        # Amount of reserved/buyed tickets
+        category_list = self.annotate(amount_reserved=Sum('reservedtickets__amount'))
+        # Total amount of tickets
+        category_list = category_list.annotate(amount_total=Count('ticket'))
+        # Compute the number of available tickets
+        for category in category_list:
+            if category.amount_reserved:
+                category.amount_available = category.amount_total - category.amount_reserved
+            else:
+                category.amount_available = category.amount_total
+        return category_list
 
 
 class OrderManager(models.Manager):
@@ -74,8 +89,23 @@ class Category(models.Model):
     """ Current selling price of the tickets in cents """
     price = models.PositiveIntegerField()
 
+    objects = CategoryManager()
+
     def __unicode__(self):
         return self.name
+
+    def amount_available(self):
+        amount_total = self.ticket_set.count()
+        reserved_tickets = self.reservedtickets_set.filter(Q(reservation__status=Reservation.OPEN) | 
+                                                           Q(reservation__status=Reservation.PAID))
+        amount_reserved = reserved_tickets.aggregate(Sum('amount'))['amount__sum']
+        # Use if clause to avoid None
+        if amount_reserved is not None:
+            return (amount_total - amount_reserved)
+        else:
+            return amount_total
+        
+        
 
 class Reservation(models.Model):
     """
@@ -101,6 +131,9 @@ class Reservation(models.Model):
     
     # For bitcoin payment
     public_address = models.CharField(max_length=100, unique=True)
+
+    # TODO/FIXME: Try to create such a payment system that you don't
+    # need to store any private keys! Just for security. Ok?
     private_key = models.CharField(max_length=100, unique=True)
     
     # Status: open -> expired/cancelled/paid
@@ -122,6 +155,12 @@ class Reservation(models.Model):
     """ The content of the reservation """
     tickets = models.ManyToManyField(Category, through='ReservedTickets')
     
+    def price(self):
+        total_price = 0
+        for tickets in self.reservedtickets_set.all():
+            total_price += tickets.amount * tickets.price
+        return total_price
+
     def cancel(self):
         pass
 
@@ -184,12 +223,6 @@ class Ticket(models.Model):
     The ticket may be either available or buyed.
     """
 
-    """ The order for which this ticket was bought (if any) """
-    transaction = models.ForeignKey(Transaction,
-                                    blank=True,
-                                    null=True,
-                                    on_delete=models.SET_NULL)
-
     """ Price we paid to the movie theater """
     price = models.PositiveIntegerField()
 
@@ -204,3 +237,12 @@ class Ticket(models.Model):
 
     def __unicode__(self):
         return "%s (%s)" % (self.number, self.category)
+
+class PaidTicket(models.Model):
+
+    """ Ticket that was bought """
+    ticket = models.OneToOneField(Ticket, primary_key=True)
+
+    """ The order for which this ticket was bought (if any) """
+    transaction = models.ForeignKey(Transaction)
+

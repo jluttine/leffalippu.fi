@@ -1,0 +1,15 @@
+{% extends "leffaliput/base.html" %}
+
+{% block content %}
+
+{% if reservation.status == CANCELLED %}
+Tilaus on peruutettu.
+{% elif reservation.status == EXPIRED %}
+Tilaus on jo umpeutunut.
+{% elif reservation.status == PAID %}
+Tilaus on jo maksettu eikä sitä voi enää perua.
+{% endif %}
+
+<a href="{% url order %}">Takaisin etusivulle</a>
+
+{% endblock %}

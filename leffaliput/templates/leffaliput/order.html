@@ -1,5 +1,19 @@
 {% extends "leffaliput/base.html" %}
 
 {% block content %}
-    ORDER SENT
+
+Tilauksen tiedot:
+
+{{ reservation.email }}
+
+{% for category in reservation.tickets_set %}
+{{ category }}
+{% endfor %}
+
+Maksutiedot on lähetetty sähköpostiisi. Suoritettuasi maksun saat lipputiedot sähköpostiisi.
+
+<p><a href="{% url cancel reservation.id %}">Peru tilaus</a></p>
+
+<a href="{% url order %}">Takaisin etusivulle</a>
+
 {% endblock %}

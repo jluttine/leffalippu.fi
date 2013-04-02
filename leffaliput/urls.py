@@ -9,6 +9,9 @@ urlpatterns = patterns('',
     # Examples:
     #url(r'^$', 'leffaliput.views.home', name='home'),
     url(r'^$', views.order, name='order'),
+    #url(r'^cancel/$', views.cancel, name='cancel'),
+    url(r'^cancel/(?P<order_id>.+)/$', views.cancel, name='cancel'),
+    url(r'^pay/(?P<order_id>.+)/$', views.pay, name='pay'),
 #url(r'^$', views.OrderView.as_view(), name='order'),
     # url(r'^leffaliput/', include('leffaliput.foo.urls')),
 

@@ -7,23 +7,55 @@
     <table>
       <thead>
         <tr>
-          <td>Lipun nimi</td>
-          <td>Lipun osto</td>
+          <td>Kategoria</td>
+          <td>Numero</td>
+          <td>Ostettu</td>
         </tr>
       </thead>
       <tbody>
         {% for ticket in ticket_list %}
         <tr>
           <td>{{ ticket.category.name }}</td>
-          <td>{{ ticket.transaction }}</td>
+          <td>{{ ticket.number }}</td>
+          <td>{{ ticket.paidticket.transaction }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
 
-    <h2>Maksamattomat varaukset:</h2>
-    {% for reservation in reservation_list %}
-    Varaus: {{ reservation }}
+    <h2>Maksamattomat avoimet varaukset:</h2>
+    {% for reservation in open_reservation_list %}
+    {{ reservation }}
+    <br />
+    Hinta: {{ reservation.price }}<br />
+    <a href="{% url cancel reservation.id %}">Peru</a>
+    <a href="{% url pay reservation.id %}">Maksa</a><br />
+    <ul>
+      {% for reservedtickets in reservation.reservedtickets_set.all %}
+      <li>{{ reservedtickets.category }} {{ reservedtickets.amount }}kpl</li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+
+    <h2>Peruutetut varaukset:</h2>
+    {% for reservation in cancelled_reservation_list %}
+    {{ reservation }}
+    <br />
+    <a href="{% url cancel reservation.id %}">Peru</a>
+    <a href="{% url pay reservation.id %}">Maksa</a><br />
+    <ul>
+      {% for reservedtickets in reservation.reservedtickets_set.all %}
+      <li>{{ reservedtickets.category }} {{ reservedtickets.amount }}kpl</li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+
+    <h2>Erääntyneet varaukset:</h2>
+    {% for reservation in expired_reservation_list %}
+    {{ reservation }}
+    <br />
+    <a href="{% url cancel reservation.id %}">Peru</a>
+    <a href="{% url pay reservation.id %}">Maksa</a><br />
     <ul>
       {% for reservedtickets in reservation.reservedtickets_set.all %}
       <li>{{ reservedtickets.category }} {{ reservedtickets.amount }}kpl</li>
@@ -33,43 +65,23 @@
 
     <h2>Maksetut ostokset:</h2>
     {% for transaction in transaction_list %}
-    Osto: {{ transaction }}
+    {{ transaction.reservation }}
+    <br />
+    <a href="{% url cancel transaction.reservation.id %}">Peru</a>
+    <a href="{% url pay transaction.reservation.id %}">Maksa</a><br />
+    Hinta: {{ transaction.reservation.price }}<br />
+    Maksuhetki: {{ transaction.date }}<br />
     <ul>
-      {% for reservedtickets in transaction.reservation.reservedtickets_set.all %}
-      <li>{{ reservedtickets.category }} {{ reservedtickets.amount }}kpl</li>
+      {% for paidticket in transaction.paidticket_set.all %}
+      <li>{{ paidticket.ticket }}</li>
       {% endfor %}
     </ul>
     {% endfor %}
-
-    <h2>Lippuja saatavilla:</h2>
-    <table>
-      <thead>
-        <tr>
-          <td>Lipun nimi</td>
-          <td>Vapaiden määrä</td>
-          <td>Hinta</td>
-        </tr>
-      </thead>
-      <tbody>
-        {% for category in category_list %}
-        <tr>
-          <td>{{ category.name }}</td>
-          <td>{{ category.amount_available }}</td>
-          <td>{{ category.price }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
 
     <h2>Osta lippuja:</h2>
 
     <form method="post" action="">
       {% csrf_token %}
-      {{ reservation_form.non_field_errors }}
-      <div class="fieldWrapper">
-        <label for="id_email">Sähköposti:</label>
-        {{ reservation_form.email }} {{ reservation_form.email.errors }}
-      </div>
       {{ category_formset.management_form }}
       <table>
         <thead>
@@ -77,35 +89,57 @@
             <th>Lippu</th>
             <th>Hinta</th>
             <th>Määrä</th>
+            <th>Saatavilla</th>
           </tr>
         </thead>
         <tbody>
           {% for form in category_formset %}
           <tr>
-            <td>{{ form.category.value }} {{ form.category }}</td>
+            <td>{{ form.category.value }}{{ form.category }}</td>
             <td>{{ form.instance.category.price }}{{ form.fields.category.initial.price }}</td>
-            {# <td>{{ form.amount }}</td> #}
             <td>
-            <input type="button" value="+" class="qtyplus" field="{{ form.amount.html_name }}" />
-            <input type="text" name="{{ form.amount.html_name }}" value="{{ form.amount.value }}" class="qty" maxlength="1" />
-            <input type="button" value="-" class="qtyminus" field="{{ form.amount.html_name }}" />
+            <input type="button" 
+                   value="+" 
+                   class="qtyplus"
+                   field="{{ form.amount.html_name }}"
+                   maxvalue="{{ form.fields.amount.max_value }}" />
+            <input type="text" 
+                   name="{{ form.amount.html_name }}" 
+                   value="{{ form.amount.value }}" 
+                   class="qty" 
+                   maxlength="1" 
+                   {# onchange="update_total_amount()" #}
+            />
+            <input type="button" 
+                   value="-" 
+                   class="qtyminus" 
+                   field="{{ form.amount.html_name }}" 
+                   minvalue="{{ form.fields.amount.min_value }}" />
             </td>
+            <td>{{ form.fields.amount.available }}</td>
             <td>{{ form.amount.errors }}{{ form.non_field_errors }}</td>
           </tr>
           {% endfor %}
         </tbody>
+        <!--
         <tfoot>
           <tr>
             <td>Yhteensä</td>
+            <td id="total_amount"></td>
+            <td></td>
+            <td></td>
+            <td>{{ category_formset.non_form_errors }}</td>
           </tr>
         </tfoot>
+        -->
       </table>
+      {{ reservation_form.non_field_errors }}
+      <div class="fieldWrapper">
+        <label for="id_email">Sähköposti:</label>
+        {{ reservation_form.email }} {{ reservation_form.email.errors }}
+      </div>
       <input type="submit" value="Osta liput" />
     </form>
-
-
-<form id="myform" method="POST" action="#">
-</form>
 
 {% endblock %}
 
@@ -117,21 +151,24 @@
         e.preventDefault();
         // Get the field name
         fieldName = $(this).attr('field');
+        // Get the maximum value
+        maxValue = parseInt($(this).attr('maxvalue'));
         // Get its current value
         var currentVal = parseInt($('input[name='+fieldName+']').val());
         // If is not undefined
         if (!isNaN(currentVal)) {
             // and it's less than the max value
-            if (currentVal < 6) {
+            if (currentVal < maxValue) {
               // Increment
               $('input[name='+fieldName+']').val(currentVal + 1);
             } else {
-              $('input[name='+fieldName+']').val(6);
+              $('input[name='+fieldName+']').val(maxValue);
             }
         } else {
             // Otherwise put a 0 there
             $('input[name='+fieldName+']').val(0);
         }
+        //update_total_amount();
     });
     // This button will decrement the value till 0
     $(".qtyminus").click(function(e) {
@@ -139,17 +176,23 @@
         e.preventDefault();
         // Get the field name
         fieldName = $(this).attr('field');
+        // Get the minimum value
+        minValue = parseInt($(this).attr('minvalue'));
         // Get its current value
         var currentVal = parseInt($('input[name='+fieldName+']').val());
         // If it isn't undefined or its greater than 0
-        if (!isNaN(currentVal) && currentVal > 0) {
+        if (!isNaN(currentVal) && currentVal > minValue) {
             // Decrement one
             $('input[name='+fieldName+']').val(currentVal - 1);
         } else {
             // Otherwise put a 0 there
-            $('input[name='+fieldName+']').val(0);
+            $('input[name='+fieldName+']').val(minValue);
         }
     });
+    function update_total_amount()
+    {
+        document.getElementById("total_amount").innerHTML = 'MORO!';
+    }
 </script>
 
 {% endblock %}
