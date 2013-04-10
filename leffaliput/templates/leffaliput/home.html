@@ -3,81 +3,6 @@
 {% block content %}
     <h1>Leffaliput edullisesti</h1>
 
-    <h2>Kaikki liput:</h2>
-    <table>
-      <thead>
-        <tr>
-          <td>Kategoria</td>
-          <td>Numero</td>
-          <td>Ostettu</td>
-        </tr>
-      </thead>
-      <tbody>
-        {% for ticket in ticket_list %}
-        <tr>
-          <td>{{ ticket.category.name }}</td>
-          <td>{{ ticket.number }}</td>
-          <td>{{ ticket.paidticket.transaction }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-
-    <h2>Maksamattomat avoimet varaukset:</h2>
-    {% for reservation in open_reservation_list %}
-    {{ reservation }}
-    <br />
-    Hinta: {{ reservation.price }}<br />
-    <a href="{% url cancel reservation.id %}">Peru</a>
-    <a href="{% url pay reservation.id %}">Maksa</a><br />
-    <ul>
-      {% for reservedtickets in reservation.reservedtickets_set.all %}
-      <li>{{ reservedtickets.category }} {{ reservedtickets.amount }}kpl</li>
-      {% endfor %}
-    </ul>
-    {% endfor %}
-
-    <h2>Peruutetut varaukset:</h2>
-    {% for reservation in cancelled_reservation_list %}
-    {{ reservation }}
-    <br />
-    <a href="{% url cancel reservation.id %}">Peru</a>
-    <a href="{% url pay reservation.id %}">Maksa</a><br />
-    <ul>
-      {% for reservedtickets in reservation.reservedtickets_set.all %}
-      <li>{{ reservedtickets.category }} {{ reservedtickets.amount }}kpl</li>
-      {% endfor %}
-    </ul>
-    {% endfor %}
-
-    <h2>Erääntyneet varaukset:</h2>
-    {% for reservation in expired_reservation_list %}
-    {{ reservation }}
-    <br />
-    <a href="{% url cancel reservation.id %}">Peru</a>
-    <a href="{% url pay reservation.id %}">Maksa</a><br />
-    <ul>
-      {% for reservedtickets in reservation.reservedtickets_set.all %}
-      <li>{{ reservedtickets.category }} {{ reservedtickets.amount }}kpl</li>
-      {% endfor %}
-    </ul>
-    {% endfor %}
-
-    <h2>Maksetut ostokset:</h2>
-    {% for transaction in transaction_list %}
-    {{ transaction.reservation }}
-    <br />
-    <a href="{% url cancel transaction.reservation.id %}">Peru</a>
-    <a href="{% url pay transaction.reservation.id %}">Maksa</a><br />
-    Hinta: {{ transaction.reservation.price }}<br />
-    Maksuhetki: {{ transaction.date }}<br />
-    <ul>
-      {% for paidticket in transaction.paidticket_set.all %}
-      <li>{{ paidticket.ticket }}</li>
-      {% endfor %}
-    </ul>
-    {% endfor %}
-
     <h2>Osta lippuja:</h2>
 
     <form method="post" action="">
@@ -95,7 +20,7 @@
         <tbody>
           {% for form in category_formset %}
           <tr>
-            <td>{{ form.category.value }}{{ form.category }}</td>
+            <td>{{ form.instance.category.name }}{{ form.fields.category.initial.name }}{{ form.category }}</td>
             <td>{{ form.instance.category.price }}{{ form.fields.category.initial.price }}</td>
             <td>
             <input type="button" 
@@ -133,10 +58,11 @@
         </tfoot>
         -->
       </table>
-      {{ reservation_form.non_field_errors }}
+      {{ category_formset.non_form_errors }}
+      {{ order_form.non_field_errors }}
       <div class="fieldWrapper">
         <label for="id_email">Sähköposti:</label>
-        {{ reservation_form.email }} {{ reservation_form.email.errors }}
+        {{ order_form.email }} {{ order_form.email.errors }}
       </div>
       <input type="submit" value="Osta liput" />
     </form>

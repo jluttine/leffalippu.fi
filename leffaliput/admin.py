@@ -19,26 +19,77 @@ Admin for `leffaliput`.
 """
 
 from django.contrib import admin
-from leffaliput import models 
+from leffaliput.models import *
 
-class ReservedTicketsInline(admin.TabularInline):
-    model = models.ReservedTickets
+from django.contrib.admin.sites import AdminSite
+
+class OrderedTicketsInline(admin.TabularInline):
+    model = OrderedTickets
     extra = 1
-    #model = models.Reservation.tickets.through
+    #model = Order.tickets.through
 
-class ReservationAdmin(admin.ModelAdmin):
-    inlines = (ReservedTicketsInline,)
+class OrderAdmin(admin.ModelAdmin):
+    inlines = (OrderedTicketsInline,)
 
 class TicketInline(admin.TabularInline):
-    model = models.Ticket
+    model = Ticket
     extra = 10
 
 class CategoryAdmin(admin.ModelAdmin):
     inlines = (TicketInline,)
     
 
-admin.site.register(models.Ticket)
-admin.site.register(models.Transaction)
-admin.site.register(models.Category, CategoryAdmin)
-admin.site.register(models.Reservation, ReservationAdmin)
-admin.site.register(models.ReservedTickets)
+from django.conf.urls import patterns, include, url
+from django.shortcuts import render
+
+class TicketAdmin(admin.ModelAdmin):
+    def get_urls(self):
+        urls = super(TicketAdmin, self).get_urls()
+        my_urls = patterns('',
+            url(r'^manager/$', self.admin_site.admin_view(self.manager_view),
+                name='manager'),
+        )
+        return my_urls + urls
+
+    def manager_view(self, request):
+        # Open orders
+        open_order_list = Order.objects.filter(orderstatus=None)
+
+        # Cancelled orders
+        cancelled_order_list = Order.objects.filter(orderstatus__status=OrderStatus.CANCELLED)
+
+        # Expired orders
+        expired_order_list = Order.objects.filter(orderstatus__status=OrderStatus.EXPIRED)
+
+        # All transactions
+        paid_order_list = Order.objects.filter(orderstatus__status=OrderStatus.PAID)
+
+        # All tickets
+        ticket_list = Ticket.objects.all().order_by('expires')
+
+        return render(request, 
+                      'leffaliput/manager.html',
+                      {
+                          'ticket_list':      ticket_list,
+                          'open_order_list': open_order_list,
+                          'cancelled_order_list': cancelled_order_list,
+                          'expired_order_list': expired_order_list,
+                          'paid_order_list': paid_order_list,
+                      })
+
+
+## site = MyAdminSite()
+
+## site.register(Ticket)
+## site.register(Transaction)
+## site.register(Category, CategoryAdmin)
+## site.register(Order, OrderAdmin)
+## site.register(ReservedTickets)
+
+admin.site.register(Ticket, TicketAdmin)
+admin.site.register(OrderStatus)
+admin.site.register(Category, CategoryAdmin)
+admin.site.register(Order, OrderAdmin)
+admin.site.register(OrderedTickets)
+admin.site.register(PaidTicket)
+

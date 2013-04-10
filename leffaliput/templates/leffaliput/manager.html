@@ -1,0 +1,86 @@
+{# {% extends "leffaliput/base.html" %} #}
+{% extends "admin/index.html" %}
+
+{% block content %}
+<div id="content-main">
+    <h1>Leffalippujen tiedot</h1>
+
+    <h2>Kaikki liput:</h2>
+    <table>
+      <thead>
+        <tr>
+          <td>Kategoria</td>
+          <td>Numero</td>
+          <td>Eräpäivä</td>
+          <td>Ostettu</td>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ticket in ticket_list %}
+        <tr>
+          <td>{{ ticket.category.name }}</td>
+          <td>{{ ticket.number }}</td>
+          <td>{{ ticket.expires }}</td>
+          <td>{{ ticket.paidticket.orderstatus.date }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h2>Maksamattomat avoimet varaukset:</h2>
+    {% for order in open_order_list %}
+    {{ order }}
+    <br />
+    Hinta: {{ order.price }}<br />
+    <a href="{% url 'cancel' order.id %}">Peru</a>
+    <a href="{% url 'pay' order.id %}">Maksa</a><br />
+    <ul>
+      {% for orderedtickets in order.orderedtickets_set.all %}
+      <li>{{ orderedtickets.category }} {{ orderedtickets.amount }}kpl</li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+
+    <h2>Peruutetut varaukset:</h2>
+    {% for order in cancelled_order_list %}
+    {{ order }}
+    <br />
+    <a href="{% url 'cancel' order.id %}">Peru</a>
+    <a href="{% url 'pay' order.id %}">Maksa</a><br />
+    <ul>
+      {% for orderedtickets in order.orderedtickets_set.all %}
+      <li>{{ orderedtickets.category }} {{ orderedtickets.amount }}kpl</li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+
+    <h2>Erääntyneet varaukset:</h2>
+    {% for order in expired_order_list %}
+    {{ order }}
+    <br />
+    <a href="{% url 'cancel' order.id %}">Peru</a>
+    <a href="{% url 'pay' order.id %}">Maksa</a><br />
+    <ul>
+      {% for orderedtickets in order.orderedtickets_set.all %}
+      <li>{{ orderedtickets.category }} {{ orderedtickets.amount }}kpl</li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+
+    <h2>Maksetut ostokset:</h2>
+    {% for order in paid_order_list %}
+    {{ order }}
+    <br />
+    <a href="{% url 'cancel' order.id %}">Peru</a>
+    <a href="{% url 'pay' order.id %}">Maksa</a><br />
+    Hinta: {{ order.price }}<br />
+    Maksuhetki: {{ order.date }}<br />
+    <ul>
+      {% for paidticket in order.orderstatus.paidticket_set.all %}
+      <li>{{ paidticket.ticket }}</li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+
+</div>
+{% endblock %}

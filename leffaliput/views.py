@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*- 
+
 # Copyright (C) 2013 Jaakko Luttinen
 #
 # This program is free software: you can redistribute it and/or modify
@@ -18,11 +20,14 @@ Views for `leffaliput`.
 """
 
 
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render
 from django.db.models import Count, Sum
 from django.forms.models import modelformset_factory, inlineformset_factory
 from django.forms.formsets import formset_factory
+from django.contrib.auth.decorators import login_required
+
+from django.core import mail
 
 from django.views.generic import View, TemplateView
 
@@ -38,50 +43,73 @@ def id_generator(size=12, chars=string.ascii_uppercase + string.digits):
 #def cancel(request):
 def cancel(request, order_id):
     try:
-        reservation = Reservation.objects.get(pk=order_id)
-    except Reservation.DoesNotExist:
+        order = Order.objects.get(pk=order_id)
+    except Order.DoesNotExist:
         raise Http404
 
-    # Only open reservations can be cancelled
-    if reservation.status == Reservation.OPEN:
-        reservation.status = Reservation.CANCELLED
-        reservation.save()
+    # Only open orders can be cancelled, so check that orderstatus does not
+    # exist.
+    try:
+        order.status = order.orderstatus.status
+    except OrderStatus.DoesNotExist:
+        orderstatus = OrderStatus(order=order,
+                                  status=OrderStatus.CANCELLED)
+        try:
+            orderstatus.save()
+            order.status = orderstatus.order
+        except:
+            raise Exception("Order could not be cancelled. Handle this situation.")
     
+        subject = "Tilauksen peruutus"
+        message = "Olet perunut tilauksesi."
+        sender = "lahettaja@leffaliput.fi"
+        receiver = order.email
+        mail.send_mail(subject,
+                       message,
+                       sender,
+                       [receiver])
+        
     return render(request,
                   'leffaliput/cancel.html',
                   {
-                      'reservation': reservation,
-                      'CANCELLED': reservation.CANCELLED,
-                      'PAID': reservation.PAID,
-                      'EXPIRED': reservation.EXPIRED,
+                      'order': order,
+                      'CANCELLED': OrderStatus.CANCELLED,
+                      'PAID': OrderStatus.PAID,
+                      'EXPIRED': OrderStatus.EXPIRED,
                   })
         
 
 def pay(request, order_id):
     """
-    Complete the reservation by adding tickets to it and marking it paid.
+    Complete the order by adding tickets to it and marking it paid.
     """
     try:
-        reservation = Reservation.objects.get(pk=order_id)
-    except Reservation.DoesNotExist:
+        order = Order.objects.get(pk=order_id)
+    except Order.DoesNotExist:
         raise Http404
 
-    # Only open reservations can be paid
-    if reservation.status == Reservation.OPEN:
-
-        # Mark the reservation paid
-        reservation.status = Reservation.PAID
-        reservation.save()
+    # Only open orders can be paid
+    try:
+        order.status = order.orderstatus.status
+    except OrderStatus.DoesNotExist:
+        orderstatus = OrderStatus(order=order,
+                                  status=OrderStatus.PAID)
+        try:
+            orderstatus.save()
+            order.status = orderstatus.status
+        except:
+            raise Exception("Order could not be paid. Handle this situation.")
     
-        # Create transaction
-        transaction = Transaction(reservation=reservation)
-        transaction.save()
+        ## # Create transaction
+        ## transaction = Transaction(order=order)
+        ## transaction.save()
 
         # Add tickets to it
-        for reserved_tickets in ReservedTickets.objects.filter(reservation=reservation):
-            category = reserved_tickets.category
-            amount = reserved_tickets.amount
-            tickets = Ticket.objects.filter(category=category,paidticket=None).order_by('expires')
+        for ordered_tickets in OrderedTickets.objects.filter(order=order):
+            category = ordered_tickets.category
+            amount = ordered_tickets.amount
+            tickets = Ticket.objects.filter(category=category,
+                                            paidticket=None).order_by('expires')
             if len(tickets) < amount:
                 # This should not happen: A customer has paid for more
                 # tickets than we have available. If this ever
@@ -91,7 +119,7 @@ def pay(request, order_id):
             for ticket in tickets[:amount]:
                 if amount_given == amount:
                     break
-                paid_ticket = PaidTicket(ticket=ticket, transaction=transaction)
+                paid_ticket = PaidTicket(ticket=ticket, orderstatus=orderstatus)
                 try:
                     paid_ticket.save()
                     amount_given += 1
@@ -103,35 +131,54 @@ def pay(request, order_id):
                     # should be enough tickets available, so no need
                     # to worry.
                     pass
-            if PaidTicket.objects.filter(transaction=transaction).count() != amount:
+            if PaidTicket.objects.filter(orderstatus=orderstatus).count() != amount:
                 # This should not happen: The system was not able to
                 # provide enough tickets for the customer.
                 raise Exception("Serious bug in the system. Not enough tickets given to the customer.")
 
+        # Send the tickets as an email
+        subject = "Leffalippusi"
+        message = "Olet maksanut leffalippusi. Tässä ovat lippujen numerot:"
+        sender = "lahettaja@leffaliput.fi"
+        receiver = order.email
+        mail.send_mail(subject,
+                       message,
+                       sender,
+                       [receiver])
+
     return render(request,
                   'leffaliput/pay.html',
                   {
-                      'reservation': reservation,
-                      'CANCELLED': reservation.CANCELLED,
-                      'PAID': reservation.PAID,
-                      'EXPIRED': reservation.EXPIRED,
+                      'order': order,
+                      'CANCELLED': OrderStatus.CANCELLED,
+                      'PAID': OrderStatus.PAID,
+                      'EXPIRED': OrderStatus.EXPIRED,
                   })
+
+def delete(request, order_id):
+    # TODO/FIXME: Check permissions!
+    try:
+        order = Order.objects.get(pk=order_id)
+        order.delete()
+        return HttpResponseRedirect(reverse('manager'))
+    except Order.DoesNotExist:
+        raise Http404
 
 def order(request):
 
     if request.method == 'POST':
 
         # Form set for providing quantities for each ticket category
-        CategoryFormSet = formset_factory(forms.ReservedTicketsForm,
-                                          formset=forms.BaseReservedTicketsFormSet)
+        CategoryFormSet = formset_factory(forms.OrderedTicketsForm,
+                                          formset=forms.BaseOrderedTicketsFormSet)
 
         # Read user input
-        reservation_form = forms.ReservationForm(request.POST)
+        order_form = forms.OrderForm(request.POST)
         category_formset = CategoryFormSet(request.POST)
 
         # Validate the input
         valid_tickets = category_formset.is_valid()
-        valid_reservation = reservation_form.is_valid()
+        valid_order = order_form.is_valid()
 
         # Set field max values
         for form in category_formset:
@@ -144,46 +191,41 @@ def order(request):
             except:
                 pass
 
-        if valid_tickets and valid_reservation:
-            # Create the reservation
-            reservation = reservation_form.save(commit=False)
+        if valid_tickets and valid_order:
+            print("HERE WE ARE")
+            # Create the order
+            order = order_form.save(commit=False)
             # Fill-in the missing fields
-            reservation.status = 'O'
-            reservation.private_key = id_generator()
-            reservation.public_address = id_generator()
-            reservation.ip = '192.128.1.1'
-            reservation.save()
-            if category_formset.save(reservation):
+            #order.status = 'O'
+            order.private_key = id_generator()
+            order.public_address = id_generator()
+            order.ip = '192.128.1.1'
+            order.save()
+            if category_formset.save(order):
+                # Order succesfull. Send email and show summary
+                subject = "Tilausvahvistus"
+                message = "Olet tilannut leffalippuja. Maksapa ne."
+                sender = "lahettaja@leffaliput.fi"
+                receiver = order.email
+                mail.send_mail(subject,
+                               message,
+                               sender,
+                               [receiver])
                 return render(request,
                               'leffaliput/order.html',
                               {
-                                  'reservation': reservation,
+                                  'order': order,
                               })
-            reservation.delete()
-
-    # Open reservations
-    open_reservation_list = Reservation.objects.filter(status=Reservation.OPEN)
-
-    # Cancelled reservations
-    cancelled_reservation_list = Reservation.objects.filter(status=Reservation.CANCELLED)
-
-    # Expired reservations
-    expired_reservation_list = Reservation.objects.filter(status=Reservation.EXPIRED)
-
-    # All transactions
-    transaction_list = Transaction.objects.all()
-    #transaction_list = Transaction.objects.annotate(price=Sum('reservation.reservedtickets_set.
-
-    # All tickets
-    ticket_list = Ticket.objects.all()
+            order.delete()
 
     if request.method != 'POST':
-        reservation_form = forms.ReservationForm()
+        order_form = forms.OrderForm()
         
         # The ticket categories that are for sale
-        category_list = Category.objects.filter(name__contains='BioRex')
+        #category_list = Category.objects.filter(name__contains='BioRex')
+        category_list = Category.objects.all()
         num_categories = len(category_list)
-        CategoryFormSet = formset_factory(forms.ReservedTicketsForm, 
+        CategoryFormSet = formset_factory(forms.OrderedTicketsForm, 
                                           extra=num_categories)
         category_formset = CategoryFormSet()
         for (form, category) in zip(category_formset, category_list):
@@ -198,11 +240,7 @@ def order(request):
     return render(request, 
                   'leffaliput/home.html',
                   {
-                      'ticket_list':      ticket_list,
-                      'open_reservation_list': open_reservation_list,
-                      'cancelled_reservation_list': cancelled_reservation_list,
-                      'expired_reservation_list': expired_reservation_list,
-                      'transaction_list': transaction_list,
-                      'reservation_form': reservation_form,
+                      'order_form': order_form,
                       'category_formset': category_formset,
                   })
+

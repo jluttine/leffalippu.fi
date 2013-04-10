@@ -26,25 +26,12 @@ from django.db import models
 
 from django.db.models import Count, Sum, Q
 
-## class Product(models.Model):
-##     name = models.CharField(max_length=100, primary_key=True)
-##     price = models.PositiveIntegerField()
-    
-## class Order(models.Model):
-##     email = models.EmailField()
-##     products = models.ManyToManyField(Product, through='OrderedProduct')
-
-## class OrderedProduct(models.Model):
-##     product = models.ForeignKey(Product)
-##     order = models.ForeignKey(Order)
-##     quantity = models.PositiveIntegerField()
-    
 
 class CategoryManager(models.Manager):
 
     def OLD_with_amount_available(self):
         # Amount of reserved/buyed tickets
-        category_list = self.annotate(amount_reserved=Sum('reservedtickets__amount'))
+        category_list = self.annotate(amount_reserved=Sum('orderedtickets__amount'))
         # Total amount of tickets
         category_list = category_list.annotate(amount_total=Count('ticket'))
         # Compute the number of available tickets
@@ -81,7 +68,7 @@ class Category(models.Model):
     """
     
     """ Short name of the ticket """
-    name = models.CharField(max_length=100, primary_key=True)
+    name = models.CharField(max_length=100, unique=True)
     
     """ Long description of the ticket and how to use """
     description = models.TextField()
@@ -96,18 +83,18 @@ class Category(models.Model):
 
     def amount_available(self):
         amount_total = self.ticket_set.count()
-        reserved_tickets = self.reservedtickets_set.filter(Q(reservation__status=Reservation.OPEN) | 
-                                                           Q(reservation__status=Reservation.PAID))
-        amount_reserved = reserved_tickets.aggregate(Sum('amount'))['amount__sum']
+        ordered_tickets = self.orderedtickets_set.filter(Q(order__orderstatus=None) | 
+                                                           Q(order__orderstatus__status=OrderStatus.PAID))
+        amount_ordered = ordered_tickets.aggregate(Sum('amount'))['amount__sum']
         # Use if clause to avoid None
-        if amount_reserved is not None:
-            return (amount_total - amount_reserved)
+        if amount_ordered is not None:
+            return (amount_total - amount_ordered)
         else:
             return amount_total
         
         
 
-class Reservation(models.Model):
+class Order(models.Model):
     """
     Class for handling ordering of tickets.
 
@@ -116,9 +103,6 @@ class Reservation(models.Model):
     for the reservation until it either expires or is cancelled.
     """
 
-    #""" Id of the order used in URL """
-    #key = models.CharField(max_length=20, primary_key=True)
-    
     """ Timestamp of the order placement """
     date = models.DateTimeField(auto_now_add=True)
     
@@ -136,28 +120,28 @@ class Reservation(models.Model):
     # need to store any private keys! Just for security. Ok?
     private_key = models.CharField(max_length=100, unique=True)
     
-    # Status: open -> expired/cancelled/paid
-    OPEN = 'O'
-    PAID = 'P'
-    CANCELLED = 'C'
-    EXPIRED = 'E'
-    STATUS_CHOICES = (
-        (OPEN, 'Open'),
-        (PAID, 'Paid'),
-        (CANCELLED, 'Cancelled'),
-        (EXPIRED, 'Expired'),
-    )
-    """ Current status of the order """
-    status = models.CharField(max_length=1,
-                              choices=STATUS_CHOICES,
-                              default=OPEN)
+    ## # Status: open -> expired/cancelled/paid
+    ## OPEN = 'O'
+    ## PAID = 'P'
+    ## CANCELLED = 'C'
+    ## EXPIRED = 'E'
+    ## STATUS_CHOICES = (
+    ##     (OPEN, 'Open'),
+    ##     (PAID, 'Paid'),
+    ##     (CANCELLED, 'Cancelled'),
+    ##     (EXPIRED, 'Expired'),
+    ## )
+    ## """ Current status of the order """
+    ## status = models.CharField(max_length=1,
+    ##                           choices=STATUS_CHOICES,
+    ##                           default=OPEN)
 
     """ The content of the reservation """
-    tickets = models.ManyToManyField(Category, through='ReservedTickets')
+    tickets = models.ManyToManyField(Category, through='OrderedTickets')
     
     def price(self):
         total_price = 0
-        for tickets in self.reservedtickets_set.all():
+        for tickets in self.orderedtickets_set.all():
             total_price += tickets.amount * tickets.price
         return total_price
 
@@ -171,15 +155,15 @@ class Reservation(models.Model):
         pass
 
     def __unicode__(self):
-        return "%s %s %s" % (self.email, self.date, self.status)
+        return "%s %s" % (self.email, self.date)
 
-class ReservedTickets(models.Model):
+class OrderedTickets(models.Model):
     """
     Intermediate class for specifying the amount of tickets in a reservation
     """
 
-    """ Reservation for which the tickets belong to """
-    reservation = models.ForeignKey(Reservation)
+    """ Order for which the tickets belong to """
+    order = models.ForeignKey(Order)
 
     """ Category of the tickets """
     category = models.ForeignKey(Category)
@@ -194,27 +178,29 @@ class ReservedTickets(models.Model):
     price = models.PositiveIntegerField()
 
     class Meta:
-        unique_together = (("reservation", "category"),)
+        unique_together = (("order", "category"),)
 
-class Transaction(models.Model):
-    """
-    Class for handling payments of tickets.
-    """
+## class Transaction(models.Model):
+##     """
+##     Class for handling payments of tickets.
+##     """
 
-    """ The reservation which lead to this payment """
-    reservation = models.OneToOneField(Reservation, primary_key=True)
+##     """ The reservation which lead to this payment """
+##     # TODO/FIXME: Do NOT use primary_key, use unique instead! Much
+##     # less headache if you change your model somehow later..
+##     reservation = models.OneToOneField(Reservation, primary_key=True)
 
-    """ Timestamp of the payment """
-    date = models.DateTimeField(auto_now_add=True)
+##     """ Timestamp of the payment """
+##     date = models.DateTimeField(auto_now_add=True)
 
-    # Note: Tickets belonging to this transaction are defined by
-    # ForeignKey in Ticket class.
+##     # Note: Tickets belonging to this transaction are defined by
+##     # ForeignKey in Ticket class.
 
-    # Use custom manager?
-    #objects = OrderManager()
+##     # Use custom manager?
+##     #objects = OrderManager()
 
-    def __unicode__(self):
-        return "%s %s" % (self.date, self.reservation)
+##     def __unicode__(self):
+##         return "%s %s" % (self.date, self.reservation)
 
 class Ticket(models.Model):
     """
@@ -238,11 +224,28 @@ class Ticket(models.Model):
     def __unicode__(self):
         return "%s (%s)" % (self.number, self.category)
 
+class OrderStatus(models.Model):
+    order = models.OneToOneField(Order, unique=True)
+    date = models.DateTimeField(auto_now_add=True)
+    # Status: open -> expired/cancelled/paid
+    PAID = 'P'
+    CANCELLED = 'C'
+    EXPIRED = 'E'
+    STATUS_CHOICES = (
+        (PAID, 'Paid'),
+        (CANCELLED, 'Cancelled'),
+        (EXPIRED, 'Expired'),
+    )
+    """ Current status of the order """
+    status = models.CharField(max_length=1,
+                              choices=STATUS_CHOICES)
+    
 class PaidTicket(models.Model):
 
     """ Ticket that was bought """
-    ticket = models.OneToOneField(Ticket, primary_key=True)
+    ticket = models.OneToOneField(Ticket, unique=True)
 
     """ The order for which this ticket was bought (if any) """
-    transaction = models.ForeignKey(Transaction)
+    orderstatus = models.ForeignKey(OrderStatus)
+    #transaction = models.ForeignKey(Transaction)
 

@@ -2,6 +2,7 @@ from django.conf.urls import patterns, include, url
 from leffaliput import views
 
 # Uncomment the next two lines to enable the admin:
+#from leffaliput import admin
 from django.contrib import admin
 admin.autodiscover()
 
@@ -12,6 +13,8 @@ urlpatterns = patterns('',
     #url(r'^cancel/$', views.cancel, name='cancel'),
     url(r'^cancel/(?P<order_id>.+)/$', views.cancel, name='cancel'),
     url(r'^pay/(?P<order_id>.+)/$', views.pay, name='pay'),
+    url(r'^delete/(?P<order_id>.+)/$', views.delete, name='delete'),
+#url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
 #url(r'^$', views.OrderView.as_view(), name='order'),
     # url(r'^leffaliput/', include('leffaliput.foo.urls')),
 

@@ -21,17 +21,17 @@ from django.forms.formsets import BaseFormSet
 from django.forms.util import ErrorList
 from django.forms.forms import NON_FIELD_ERRORS
 
-from leffaliput.models import Reservation, Category, ReservedTickets
+from leffaliput.models import Order, Category, OrderedTickets
 
 # debugging
 import inspect
 
 MAX_AMOUNT = 5
 
-class ReservationForm(forms.ModelForm):
+class OrderForm(forms.ModelForm):
     
     class Meta:
-        model = Reservation
+        model = Order
         fields = ('email',)
 
     def clean(self):
@@ -40,17 +40,17 @@ class ReservationForm(forms.ModelForm):
 
         1) The email address doesn't have other open orders
         """
-        cleaned_data = super(ReservationForm, self).clean()
+        cleaned_data = super(OrderForm, self).clean()
         return cleaned_data
 
-class ReservedTicketsForm(forms.ModelForm):
+class OrderedTicketsForm(forms.ModelForm):
     amount = forms.IntegerField(required=False,
                                 initial=0,
                                 min_value=0,
                                 max_value=MAX_AMOUNT)
 
     class Meta:
-        model = ReservedTickets
+        model = OrderedTickets
         fields = ('amount','category',)
         widgets = {'category': forms.HiddenInput}
 
@@ -64,7 +64,7 @@ class ReservedTicketsForm(forms.ModelForm):
         """
 
         # Validate the fields
-        cleaned_data = super(ReservedTicketsForm, self).clean()
+        cleaned_data = super(OrderedTicketsForm, self).clean()
         if any(self.errors):
             return cleaned_data
 
@@ -78,7 +78,7 @@ class ReservedTicketsForm(forms.ModelForm):
 
         return cleaned_data
                                 
-class BaseReservedTicketsFormSet(BaseFormSet):
+class BaseOrderedTicketsFormSet(BaseFormSet):
 
     def clean(self):
         """
@@ -121,7 +121,7 @@ class BaseReservedTicketsFormSet(BaseFormSet):
 
         return
 
-    def save(self, reservation):
+    def save(self, order):
         """
         Custom save method for the form set.
 
@@ -130,14 +130,14 @@ class BaseReservedTicketsFormSet(BaseFormSet):
         Paranoid check: At the end, check that the amount of available
         tickets for any category is not negative, if several people
         made simultaneous orders. If a negative amount is found,
-        delete all these just saved reservations and return False.
+        delete all these just saved orders and return False.
         """
         for form in self.forms:
             amount = form.cleaned_data['amount']
             if amount > 0:
                 # Save only non-zero ticket categories
                 category = form.cleaned_data['category']
-                reserved_tickets = ReservedTickets(reservation=reservation,
+                reserved_tickets = OrderedTickets(order=order,
                                                    category=category,
                                                    amount=amount,
                                                    price=category.price)
@@ -148,10 +148,10 @@ class BaseReservedTicketsFormSet(BaseFormSet):
                     # simultaneous purchases happen, it may be that
                     # they both reserve "the same" tickets and the
                     # amount of available tickets becomes
-                    # negative. Thus, cancel this reservation.
+                    # negative. Thus, cancel this order.
                     errors = form._errors.setdefault(NON_FIELD_ERRORS, ErrorList())
                     errors.append("Lippuja ei ole riittävästi saatavilla.")
-                    ReservedTickets.objects.filter(reservation=reservation).delete()
+                    OrderedTickets.objects.filter(order=order).delete()
                     return False
                 
         return True

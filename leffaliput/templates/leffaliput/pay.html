@@ -2,14 +2,16 @@
 
 {% block content %}
 
-{% if reservation.status == CANCELLED %}
+{% if order.status == CANCELLED %}
 Tilaus on jo peruutettu eikä sitä enää voi maksaa. Ota yhteyttä saadaksesi rahasi takaisin.
-{% elif reservation.status == EXPIRED %}
+{% elif order.status == EXPIRED %}
 Tilaus on jo umpeutunut eikä sitä enää voi maksaa. Ota yhteyttä saadaksesi rahasi takaisin.
-{% elif reservation.status == PAID %}
+{% elif order.status == PAID %}
 Tilaus on maksettu.
+{% else %}
+Tilauksen tila on tuntematon.
 {% endif %}
 
-<a href="{% url order %}">Takaisin etusivulle</a>
+<a href="{% url 'order' %}">Takaisin etusivulle</a>
 
 {% endblock %}
