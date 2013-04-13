@@ -46,10 +46,11 @@
     {{ order }}
     <br />
     <a href="{% url 'cancel' order.id %}">Peru</a>
-    <a href="{% url 'pay' order.id %}">Maksa</a><br />
+    <a href="{% url 'pay' order.id %}">Maksa</a>
+    <a href="{% url 'delete' order.id %}">Poista</a><br />
     <ul>
       {% for orderedtickets in order.orderedtickets_set.all %}
-      <li>{{ orderedtickets.category }} {{ orderedtickets.amount }}kpl</li>
+      <li>{{ orderedtickets.amount }} x {{ orderedtickets.category }}</li>
       {% endfor %}
     </ul>
     {% endfor %}
@@ -74,7 +75,7 @@
     <a href="{% url 'cancel' order.id %}">Peru</a>
     <a href="{% url 'pay' order.id %}">Maksa</a><br />
     Hinta: {{ order.price }}<br />
-    Maksuhetki: {{ order.date }}<br />
+    Maksuhetki: {{ order.orderstatus.date }}<br />
     <ul>
       {% for paidticket in order.orderstatus.paidticket_set.all %}
       <li>{{ paidticket.ticket }}</li>

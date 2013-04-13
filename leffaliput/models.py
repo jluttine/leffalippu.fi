@@ -120,22 +120,6 @@ class Order(models.Model):
     # need to store any private keys! Just for security. Ok?
     private_key = models.CharField(max_length=100, unique=True)
     
-    ## # Status: open -> expired/cancelled/paid
-    ## OPEN = 'O'
-    ## PAID = 'P'
-    ## CANCELLED = 'C'
-    ## EXPIRED = 'E'
-    ## STATUS_CHOICES = (
-    ##     (OPEN, 'Open'),
-    ##     (PAID, 'Paid'),
-    ##     (CANCELLED, 'Cancelled'),
-    ##     (EXPIRED, 'Expired'),
-    ## )
-    ## """ Current status of the order """
-    ## status = models.CharField(max_length=1,
-    ##                           choices=STATUS_CHOICES,
-    ##                           default=OPEN)
-
     """ The content of the reservation """
     tickets = models.ManyToManyField(Category, through='OrderedTickets')
     
@@ -180,28 +164,6 @@ class OrderedTickets(models.Model):
     class Meta:
         unique_together = (("order", "category"),)
 
-## class Transaction(models.Model):
-##     """
-##     Class for handling payments of tickets.
-##     """
-
-##     """ The reservation which lead to this payment """
-##     # TODO/FIXME: Do NOT use primary_key, use unique instead! Much
-##     # less headache if you change your model somehow later..
-##     reservation = models.OneToOneField(Reservation, primary_key=True)
-
-##     """ Timestamp of the payment """
-##     date = models.DateTimeField(auto_now_add=True)
-
-##     # Note: Tickets belonging to this transaction are defined by
-##     # ForeignKey in Ticket class.
-
-##     # Use custom manager?
-##     #objects = OrderManager()
-
-##     def __unicode__(self):
-##         return "%s %s" % (self.date, self.reservation)
-
 class Ticket(models.Model):
     """
     A movie ticket.
@@ -222,12 +184,13 @@ class Ticket(models.Model):
     expires = models.DateField()
 
     def __unicode__(self):
-        return "%s (%s)" % (self.number, self.category)
+        return "%s %s (%s)" % (self.category, self.number, self.expires)
 
 class OrderStatus(models.Model):
     order = models.OneToOneField(Order, unique=True)
     date = models.DateTimeField(auto_now_add=True)
-    # Status: open -> expired/cancelled/paid
+
+    # Status: expired/cancelled/paid
     PAID = 'P'
     CANCELLED = 'C'
     EXPIRED = 'E'

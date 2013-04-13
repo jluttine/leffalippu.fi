@@ -108,9 +108,9 @@ class BaseOrderedTicketsFormSet(BaseFormSet):
         if total_amount <= 0:
             raise forms.ValidationError("Tilauksen täytyy sisältää vähintään yksi lippu.")
 
-        # An order may contain each ticket category only once. This
-        # error is prevented in UI, but some people may try to send
-        # cheat the system by sending custom POST messages.
+        # An order may contain each ticket category only once. This error is
+        # prevented in UI, but some people may try to cheat the system by
+        # sending custom POST messages.
         categories = []
         for form in self.forms:
             category = form.cleaned_data['category']

@@ -56,7 +56,7 @@ def cancel(request, order_id):
                                   status=OrderStatus.CANCELLED)
         try:
             orderstatus.save()
-            order.status = orderstatus.order
+            order.status = orderstatus.status
         except:
             raise Exception("Order could not be cancelled. Handle this situation.")
     
@@ -88,7 +88,7 @@ def pay(request, order_id):
     except Order.DoesNotExist:
         raise Http404
 
-    # Only open orders can be paid
+    # Only open orders can be paid, so check that orderstatus does not exist.
     try:
         order.status = order.orderstatus.status
     except OrderStatus.DoesNotExist:
@@ -100,10 +100,6 @@ def pay(request, order_id):
         except:
             raise Exception("Order could not be paid. Handle this situation.")
     
-        ## # Create transaction
-        ## transaction = Transaction(order=order)
-        ## transaction.save()
-
         # Add tickets to it
         for ordered_tickets in OrderedTickets.objects.filter(order=order):
             category = ordered_tickets.category
