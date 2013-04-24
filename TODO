@@ -1,9 +1,9 @@
 
-[ ] Emails (check, cancel, paid, expired)
-[ ] Encrypted URLs for orders
+[x] Emails (check, cancel, paid, expired)
+[x] Encrypted URLs for orders
 [ ] Bitcoin payment
 [ ] Expiration of order
-[ ] SSL for admin and payments
+[x] SSL for admin and payments
 [ ] CSS and looks
 [ ] Terms of service
 [ ] Captcha?

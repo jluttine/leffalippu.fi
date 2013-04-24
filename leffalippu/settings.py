@@ -27,6 +27,12 @@ DATABASES = {
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_ADDRESS = 'asiakaspalvelu@leffalippu.fi'
 
+CRON_CLASSES = [
+    "leffalippu.models.ExpirationCronJob",
+]
+
+EXPIRATION_MINUTES = 15
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -141,6 +147,7 @@ INSTALLED_APPS = (
     'leffalippu',
     #'south',
     'mail_templated',
+    'django_cron',
 )
 
 # A sample logging configuration. The only tangible logging

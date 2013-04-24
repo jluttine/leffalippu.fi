@@ -28,7 +28,41 @@ from django.db.models import Count, Sum, Q
 
 import encrypted_models
 
+# A cron job for finding expired orders.
+# Add to crontab: python manage.py runcrons
+from django_cron import CronJobBase, Schedule
+from mail_templated import send_mail
+import datetime
+class ExpirationCronJob(CronJobBase):
+    RUN_EVERY_MINS = 1 # every minute
 
+    schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
+    code = 'leffalippu.check_expiration'    # a unique code
+
+    def do(self):
+        print("MOI!")
+        earliest_date = (datetime.datetime.today() 
+                         - datetime.timedelta(0,
+                                              60*settings.EXPIRATION_MINUTES))
+        print("hei")
+        print(earliest_date)
+        expired_orders = Order.objects.filter(orderstatus=None,date__lt=earliest_date)
+        for order in expired_orders:
+            try:
+                expired_status = OrderStatus(order=order, 
+                                             status=OrderStatus.CANCELLED)
+                expired_status.save()
+                send_mail('email/expire.txt',
+                          {
+                              'order': order,
+                              'EMAIL_ADDRESS': settings.EMAIL_ADDRESS,
+                          },
+                          settings.EMAIL_ADDRESS,
+                          [order.email])
+            except:
+                pass
+        
+    
 class CategoryManager(models.Manager):
 
     def OLD_with_amount_available(self):
