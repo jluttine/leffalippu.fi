@@ -2,7 +2,7 @@
 [x] Emails (check, cancel, paid, expired)
 [x] Encrypted URLs for orders
 [ ] Bitcoin payment
-[ ] Expiration of order
+[x] Expiration of order
 [x] SSL for admin and payments
 [ ] CSS and looks
 [ ] Terms of service

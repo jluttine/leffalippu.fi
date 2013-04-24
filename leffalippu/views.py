@@ -199,8 +199,11 @@ def order(request):
             order = order_form.save(commit=False)
             # Fill-in the missing fields
             #order.status = 'O'
-            order.private_key = id_generator()
-            order.public_address = id_generator()
+            #order.private_key = id_generator()
+            import string
+            import random
+            order.public_address = ''.join(random.choice(string.ascii_uppercase+string.digits) 
+                                           for x in range(12))
             order.ip = '192.128.1.1'
             order.save()
             if category_formset.save(order):

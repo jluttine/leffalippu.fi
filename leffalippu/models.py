@@ -33,6 +33,8 @@ import encrypted_models
 from django_cron import CronJobBase, Schedule
 from mail_templated import send_mail
 import datetime
+from django.utils import timezone
+from django.conf import settings
 class ExpirationCronJob(CronJobBase):
     RUN_EVERY_MINS = 1 # every minute
 
@@ -40,17 +42,14 @@ class ExpirationCronJob(CronJobBase):
     code = 'leffalippu.check_expiration'    # a unique code
 
     def do(self):
-        print("MOI!")
-        earliest_date = (datetime.datetime.today() 
-                         - datetime.timedelta(0,
-                                              60*settings.EXPIRATION_MINUTES))
-        print("hei")
-        print(earliest_date)
+        now = timezone.now()
+        delta = datetime.timedelta(0, 60*settings.EXPIRATION_MINUTES)
+        earliest_date = now - delta
         expired_orders = Order.objects.filter(orderstatus=None,date__lt=earliest_date)
         for order in expired_orders:
             try:
                 expired_status = OrderStatus(order=order, 
-                                             status=OrderStatus.CANCELLED)
+                                             status=OrderStatus.EXPIRED)
                 expired_status.save()
                 send_mail('email/expire.txt',
                           {
@@ -154,7 +153,7 @@ class Order(encrypted_models.EncryptedPKModel):
 
     # TODO/FIXME: Try to create such a payment system that you don't
     # need to store any private keys! Just for security. Ok?
-    private_key = models.CharField(max_length=100, unique=True)
+    #private_key = models.CharField(max_length=100, unique=True)
     
     """ The content of the reservation """
     tickets = models.ManyToManyField(Category, through='OrderedTickets')
