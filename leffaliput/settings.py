@@ -25,6 +25,7 @@ DATABASES = {
 
 # Email settings. Use dummy settings here, overwrite in local_settings.py
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_ADDRESS = 'asiakaspalvelu@leffaliput.fi'
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -86,8 +87,15 @@ STATICFILES_FINDERS = (
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
+# OVERWRITE THE FOLLOWING KEYS IN LOCAL_SETTINGS.PY
+#
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'ykw0$v$-q811*0r^vl9j3m81jk=d3xwz5tkcwx+^84fwtm9@qp'
+# Key for encrypting the order ID for the customer
+PUBLIC_URL_KEY = 'abc123'
+# Key for encrypting the order ID for the bitcoin payment system
+PRIVATE_URL_KEY = 'qwerty'
+
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -129,7 +137,8 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'leffaliput',
-    'south',
+    #'south',
+    'mail_templated',
 )
 
 # A sample logging configuration. The only tangible logging

@@ -73,7 +73,8 @@
     {{ order }}
     <br />
     <a href="{% url 'cancel' order.id %}">Peru</a>
-    <a href="{% url 'pay' order.id %}">Maksa</a><br />
+    <a href="{% url 'pay' order.id %}">Maksa</a>
+    <a href="{% url 'delete' order.id %}">Poista</a><br />
     Hinta: {{ order.price }}<br />
     Maksuhetki: {{ order.orderstatus.date }}<br />
     <ul>

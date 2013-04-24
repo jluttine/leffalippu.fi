@@ -26,6 +26,8 @@ from django.db import models
 
 from django.db.models import Count, Sum, Q
 
+import encrypted_models
+
 
 class CategoryManager(models.Manager):
 
@@ -42,21 +44,6 @@ class CategoryManager(models.Manager):
                 category.amount_available = category.amount_total
         return category_list
 
-
-class OrderManager(models.Manager):
-
-    # When a status of an order changes, remember to update the ticket
-    # too! If the order is expired or cancelled, the ticket must be
-    # freed for new orders.
-
-    def create_order(self, email):
-        # Send email with payment instructions
-        pass
-
-    def check_status(self):
-        # Go through orders and check whether some have expired or
-        # been paid..
-        pass
 
 
 class Category(models.Model):
@@ -94,7 +81,19 @@ class Category(models.Model):
         
         
 
-class Order(models.Model):
+class OrderManager(encrypted_models.EncryptedPKModelManager):
+    pass
+
+    ## def create_order(self, email):
+    ##     # Send email with payment instructions
+    ##     pass
+
+    ## def check_status(self):
+    ##     # Go through orders and check whether some have expired or
+    ##     # been paid..
+    ##     pass
+
+class Order(encrypted_models.EncryptedPKModel):
     """
     Class for handling ordering of tickets.
 
@@ -102,6 +101,9 @@ class Order(models.Model):
     expires, is cancelled or is paid. Tickets should be kept reserved
     for the reservation until it either expires or is cancelled.
     """
+
+    """ Object manager for encrypted PKs """
+    objects = OrderManager()
 
     """ Timestamp of the order placement """
     date = models.DateTimeField(auto_now_add=True)
@@ -128,6 +130,9 @@ class Order(models.Model):
         for tickets in self.orderedtickets_set.all():
             total_price += tickets.amount * tickets.price
         return total_price
+
+    def price_in_euros(self):
+        return "%.2f" % (self.price()/100.0,)
 
     def cancel(self):
         pass

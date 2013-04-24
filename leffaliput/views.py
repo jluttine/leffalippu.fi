@@ -26,8 +26,12 @@ from django.db.models import Count, Sum
 from django.forms.models import modelformset_factory, inlineformset_factory
 from django.forms.formsets import formset_factory
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 
-from django.core import mail
+#from django.core import mail
+from mail_templated import send_mail
+
+from django.conf import settings
 
 from django.views.generic import View, TemplateView
 
@@ -59,15 +63,14 @@ def cancel(request, order_id):
             order.status = orderstatus.status
         except:
             raise Exception("Order could not be cancelled. Handle this situation.")
-    
-        subject = "Tilauksen peruutus"
-        message = "Olet perunut tilauksesi."
-        sender = "lahettaja@leffaliput.fi"
-        receiver = order.email
-        mail.send_mail(subject,
-                       message,
-                       sender,
-                       [receiver])
+
+        send_mail('email/cancel.txt',
+                  {
+                      'order': order,
+                      'EMAIL_ADDRESS': settings.EMAIL_ADDRESS,
+                  },
+                  settings.EMAIL_ADDRESS,
+                  [order.email])
         
     return render(request,
                   'leffaliput/cancel.html',
@@ -132,15 +135,15 @@ def pay(request, order_id):
                 # provide enough tickets for the customer.
                 raise Exception("Serious bug in the system. Not enough tickets given to the customer.")
 
-        # Send the tickets as an email
-        subject = "Leffalippusi"
-        message = "Olet maksanut leffalippusi. Tässä ovat lippujen numerot:"
-        sender = "lahettaja@leffaliput.fi"
-        receiver = order.email
-        mail.send_mail(subject,
-                       message,
-                       sender,
-                       [receiver])
+        tickets = Ticket.objects.filter(paidticket__orderstatus=orderstatus)
+        send_mail('email/pay.txt',
+                  {
+                      'order': order,
+                      'tickets': tickets,
+                      'EMAIL_ADDRESS': settings.EMAIL_ADDRESS,
+                  },
+                  settings.EMAIL_ADDRESS,
+                  [order.email])
 
     return render(request,
                   'leffaliput/pay.html',
@@ -155,8 +158,12 @@ def delete(request, order_id):
     # TODO/FIXME: Check permissions!
     try:
         order = Order.objects.get(pk=order_id)
+        # Delete ticket payments for this order
+        #PaidTicket.objects.filter(orderstatus__order=order).delete()
+        # Delete the order
         order.delete()
-        return HttpResponseRedirect(reverse('manager'))
+        return HttpResponseRedirect(reverse('admin:manager'))
+    #return HttpResponseRedirect(reverse('manager', args=(request, order_id,)))
     except Order.DoesNotExist:
         raise Http404
 
@@ -188,7 +195,6 @@ def order(request):
                 pass
 
         if valid_tickets and valid_order:
-            print("HERE WE ARE")
             # Create the order
             order = order_form.save(commit=False)
             # Fill-in the missing fields
@@ -199,14 +205,16 @@ def order(request):
             order.save()
             if category_formset.save(order):
                 # Order succesfull. Send email and show summary
-                subject = "Tilausvahvistus"
-                message = "Olet tilannut leffalippuja. Maksapa ne."
-                sender = "lahettaja@leffaliput.fi"
-                receiver = order.email
-                mail.send_mail(subject,
-                               message,
-                               sender,
-                               [receiver])
+                CANCEL_URL = reverse('cancel', args=[order.id])
+                CANCEL_URL = request.build_absolute_uri(CANCEL_URL)
+                send_mail('email/order.txt',
+                          {
+                              'order': order,
+                              'CANCEL_URL': CANCEL_URL,
+                              'EMAIL_ADDRESS': settings.EMAIL_ADDRESS,
+                          },
+                          settings.EMAIL_ADDRESS,
+                          [order.email])
                 return render(request,
                               'leffaliput/order.html',
                               {
