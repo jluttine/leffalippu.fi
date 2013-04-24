@@ -1,9 +1,9 @@
 {% block subject %}
-Tilaus {{ order.id }} peruutettu
+Tilaus {{ order.encrypted_pk }} peruutettu
 {% endblock %}
 
 {% block body %}
-Olet perunut elokuvalipputilauksesi {{ order.id }}.
+Olet perunut elokuvalipputilauksesi {{ order.encrypted_pk }}.
 
 Terveisin,
 Leffalippu.fi

@@ -1,11 +1,11 @@
 {% block subject %}
-Tilauksen {{ order.id }} vahvistus
+Tilauksen {{ order.encrypted_pk }} vahvistus
 {% endblock %}
 
 {% block body %}
 Tähän sähköpostiosoitteeseen on tilattu elokuvalippuja palvelusta Leffalippu.fi. Mikäli olet saanut tämän viestin aiheetta, sinun ei tarvitse tehdä mitään.
 
-Tilauksesi tunnus on {{ order.id }} ja sisältö on seuraavanlainen:
+Tilauksesi tunnus on {{ order.encrypted_pk }} ja sisältö on seuraavanlainen:
 {% for orderedtickets in order.orderedtickets_set.all %}
 {{ orderedtickets.amount }}kpl {{ orderedtickets.category }}{% endfor %}
 

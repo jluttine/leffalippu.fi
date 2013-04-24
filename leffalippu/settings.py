@@ -92,9 +92,11 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'ykw0$v$-q811*0r^vl9j3m81jk=d3xwz5tkcwx+^84fwtm9@qp'
 # Key for encrypting the order ID for the customer
-PUBLIC_URL_KEY = 'abc123'
+#PUBLIC_URL_KEY = 'abc123'
 # Key for encrypting the order ID for the bitcoin payment system
-PRIVATE_URL_KEY = 'qwerty'
+#PRIVATE_URL_KEY = 'qwerty'
+# 8 character key for encrypted models
+CHAR8KEY = '8charkey'
 
 
 # List of callables that know how to import templates from various sources.

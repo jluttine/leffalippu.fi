@@ -8,6 +8,7 @@ import struct
 from Crypto.Cipher import DES
 from django.db import models
 
+from django.conf import settings
 
 def base36encode(number):
     """Encode number to string of alphanumeric characters (0 to z). (Code taken from Wikipedia)."""
@@ -44,7 +45,7 @@ class EncryptedPKModelManager(models.Manager):
 
 class EncryptedPKModel(models.Model):
     """Adds encrypted_pk property to children which returns the encrypted value of the primary key."""
-    encryption_obj = DES.new('8charkey') # This 8 character secret key should be changed!
+    encryption_obj = DES.new(settings.CHAR8KEY)
 
     def __init__(self, *args, **kwargs):
         super(EncryptedPKModel, self).__init__(*args, **kwargs)
@@ -65,16 +66,16 @@ class EncryptedPKModel(models.Model):
         abstract = True
 
 
-## class ExampleModelManager(EncryptedPKModelManager):
-##     pass
-
-
-## class ExampleModel(EncryptedPKModel):
-##     objects = ExampleModelManager()
-##     example_field = models.CharField(max_length=32)
-
 
 # Example usage:
+#
+# class ExampleModelManager(EncryptedPKModelManager):
+#     pass
+#
+# class ExampleModel(EncryptedPKModel):
+#     objects = ExampleModelManager()
+#     example_field = models.CharField(max_length=32)
+#
 # example_instance = ExampleModel.objects.get(pk=1)
 # url_pk = example_instance.encrypted_pk
 # ExampleModel.objects.get(encrypted_pk=url_pk)

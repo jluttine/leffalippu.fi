@@ -12,7 +12,7 @@ Tilauksen tiedot:
 
 Maksutiedot on lähetetty sähköpostiisi. Suoritettuasi maksun saat lipputiedot sähköpostiisi.
 
-<p><a href="{% url 'cancel' order.id %}">Peru tilaus</a></p>
+<p><a href="{% url 'cancel' order.encrypted_pk %}">Peru tilaus</a></p>
 
 <a href="{% url 'order' %}">Takaisin etusivulle</a>
 

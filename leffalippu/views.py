@@ -47,7 +47,7 @@ def id_generator(size=12, chars=string.ascii_uppercase + string.digits):
 #def cancel(request):
 def cancel(request, order_id):
     try:
-        order = Order.objects.get(pk=order_id)
+        order = Order.objects.get(encrypted_pk=order_id)
     except Order.DoesNotExist:
         raise Http404
 
@@ -87,7 +87,7 @@ def pay(request, order_id):
     Complete the order by adding tickets to it and marking it paid.
     """
     try:
-        order = Order.objects.get(pk=order_id)
+        order = Order.objects.get(encrypted_pk=order_id)
     except Order.DoesNotExist:
         raise Http404
 
@@ -157,7 +157,7 @@ def pay(request, order_id):
 def delete(request, order_id):
     # TODO/FIXME: Check permissions!
     try:
-        order = Order.objects.get(pk=order_id)
+        order = Order.objects.get(encrypted_pk=order_id)
         # Delete ticket payments for this order
         #PaidTicket.objects.filter(orderstatus__order=order).delete()
         # Delete the order
@@ -205,7 +205,7 @@ def order(request):
             order.save()
             if category_formset.save(order):
                 # Order succesfull. Send email and show summary
-                CANCEL_URL = reverse('cancel', args=[order.id])
+                CANCEL_URL = reverse('cancel', args=[order.encrypted_pk])
                 CANCEL_URL = request.build_absolute_uri(CANCEL_URL)
                 send_mail('email/order.txt',
                           {
@@ -215,6 +215,7 @@ def order(request):
                           },
                           settings.EMAIL_ADDRESS,
                           [order.email])
+                #return HttpResponseRedirect(reverse(''))
                 return render(request,
                               'leffalippu/order.html',
                               {

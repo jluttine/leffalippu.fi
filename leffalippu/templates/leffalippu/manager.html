@@ -32,8 +32,8 @@
     {{ order }}
     <br />
     Hinta: {{ order.price }}<br />
-    <a href="{% url 'cancel' order.id %}">Peru</a>
-    <a href="{% url 'pay' order.id %}">Maksa</a><br />
+    <a href="{% url 'cancel' order.encrypted_pk %}">Peru</a>
+    <a href="{% url 'pay' order.encrypted_pk %}">Maksa</a><br />
     <ul>
       {% for orderedtickets in order.orderedtickets_set.all %}
       <li>{{ orderedtickets.category }} {{ orderedtickets.amount }}kpl</li>
@@ -45,9 +45,9 @@
     {% for order in cancelled_order_list %}
     {{ order }}
     <br />
-    <a href="{% url 'cancel' order.id %}">Peru</a>
-    <a href="{% url 'pay' order.id %}">Maksa</a>
-    <a href="{% url 'delete' order.id %}">Poista</a><br />
+    <a href="{% url 'cancel' order.encrypted_pk %}">Peru</a>
+    <a href="{% url 'pay' order.encrypted_pk %}">Maksa</a>
+    <a href="{% url 'delete' order.encrypted_pk %}">Poista</a><br />
     <ul>
       {% for orderedtickets in order.orderedtickets_set.all %}
       <li>{{ orderedtickets.amount }} x {{ orderedtickets.category }}</li>
@@ -59,8 +59,8 @@
     {% for order in expired_order_list %}
     {{ order }}
     <br />
-    <a href="{% url 'cancel' order.id %}">Peru</a>
-    <a href="{% url 'pay' order.id %}">Maksa</a><br />
+    <a href="{% url 'cancel' order.encrypted_pk %}">Peru</a>
+    <a href="{% url 'pay' order.encrypted_pk %}">Maksa</a><br />
     <ul>
       {% for orderedtickets in order.orderedtickets_set.all %}
       <li>{{ orderedtickets.category }} {{ orderedtickets.amount }}kpl</li>
@@ -72,9 +72,9 @@
     {% for order in paid_order_list %}
     {{ order }}
     <br />
-    <a href="{% url 'cancel' order.id %}">Peru</a>
-    <a href="{% url 'pay' order.id %}">Maksa</a>
-    <a href="{% url 'delete' order.id %}">Poista</a><br />
+    <a href="{% url 'cancel' order.encrypted_pk %}">Peru</a>
+    <a href="{% url 'pay' order.encrypted_pk %}">Maksa</a>
+    <a href="{% url 'delete' order.encrypted_pk %}">Poista</a><br />
     Hinta: {{ order.price }}<br />
     Maksuhetki: {{ order.orderstatus.date }}<br />
     <ul>

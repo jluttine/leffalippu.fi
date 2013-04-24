@@ -1,9 +1,9 @@
 {% block subject %}
-Tilauksen {{ order.id }} liput
+Tilauksen {{ order.encrypted_pk }} liput
 {% endblock %}
 
 {% block body %}
-Olemme vastaanottaneet maksusi tilaukselle {{ order.id }}.
+Olemme vastaanottaneet maksusi tilaukselle {{ order.encrypted_pk }}.
 
 Tässä ovat elokuvalippusi:
 ------{% for ticket in tickets %}
