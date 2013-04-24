@@ -1,0 +1,11 @@
+{% block subject %}
+Tilaus {{ order.id }} umpeutunut
+{% endblock %}
+
+{% block body %}
+Tilaus {{ order.id }} on umpeutunut automaattisesti, koska sitä ei maksettu määräaikaan mennessä. Mikäli olet kuitenkin maksanut tilauksen, ota yhteyttä saadaksesi rahasi takaisin tai elokuvalippusi.
+
+Terveisin,
+Leffaliput.fi
+{{ EMAIL_ADDRESS }}
+{% endblock %}

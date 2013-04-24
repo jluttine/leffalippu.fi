@@ -1,0 +1,19 @@
+{% block subject %}
+Tilauksen {{ order.id }} liput
+{% endblock %}
+
+{% block body %}
+Olemme vastaanottaneet maksusi tilaukselle {{ order.id }}.
+
+Tässä ovat elokuvalippusi:
+------{% for ticket in tickets %}
+Lipputyyppi: {{ ticket.category }}
+Lipun numero: {{ ticket.number }}
+Viimeinen käyttöpäivä: {{ ticket.expires }}
+------{% endfor %}
+
+Kiitos ostoksestasi ja mukavia elokuvahetkiä!
+
+Leffaliput.fi
+{{ EMAIL_ADDRESS }}
+{% endblock %}

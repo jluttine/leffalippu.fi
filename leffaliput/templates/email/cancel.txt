@@ -1,0 +1,11 @@
+{% block subject %}
+Tilaus {{ order.id }} peruutettu
+{% endblock %}
+
+{% block body %}
+Olet perunut elokuvalipputilauksesi {{ order.id }}.
+
+Terveisin,
+Leffaliput.fi
+{{ EMAIL_ADDRESS }}
+{% endblock %}

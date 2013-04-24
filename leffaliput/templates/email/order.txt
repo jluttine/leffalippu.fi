@@ -1,0 +1,25 @@
+{% block subject %}
+Tilauksen {{ order.id }} vahvistus
+{% endblock %}
+
+{% block body %}
+Tähän sähköpostiosoitteeseen on tilattu elokuvalippuja palvelusta Leffaliput.fi. Mikäli olet saanut tämän viestin aiheetta, sinun ei tarvitse tehdä mitään.
+
+Tilauksesi tunnus on {{ order.id }} ja sisältö on seuraavanlainen:
+{% for orderedtickets in order.orderedtickets_set.all %}
+{{ orderedtickets.amount }}kpl {{ orderedtickets.category }}{% endfor %}
+
+Hinta yhteensä: {{ order.price_in_euros }} euroa
+
+Tässä on lasku, joka täytyy maksaa 15 minuutin kuluessa tai tilaus umpeutuu automaattisesti:
+...
+
+HUOM! Kun olet maksanut tilauksen, saat lippusi tähän sähköpostiin eikä tilausta enää sen jälkeen voi peruuttaa.
+
+Voit perua tilauksen seuraavalla linkillä:
+{{ CANCEL_URL }}
+
+Ystävällisin terveisin,
+Leffaliput.fi
+{{ EMAIL_ADDRESS }}
+{% endblock %}
