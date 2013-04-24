@@ -15,11 +15,11 @@
 # <http://www.gnu.org/licenses/>.
 
 """
-Admin for `leffaliput`.
+Admin for `leffalippu`.
 """
 
 from django.contrib import admin
-from leffaliput.models import *
+from leffalippu.models import *
 
 from django.contrib.admin.sites import AdminSite
 
@@ -68,7 +68,7 @@ class TicketAdmin(admin.ModelAdmin):
         ticket_list = Ticket.objects.all().order_by('expires')
 
         return render(request, 
-                      'leffaliput/manager.html',
+                      'leffalippu/manager.html',
                       {
                           'ticket_list':      ticket_list,
                           'open_order_list': open_order_list,

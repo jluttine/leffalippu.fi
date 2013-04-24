@@ -6,6 +6,6 @@ Tilaus {{ order.id }} umpeutunut
 Tilaus {{ order.id }} on umpeutunut automaattisesti, koska sitä ei maksettu määräaikaan mennessä. Mikäli olet kuitenkin maksanut tilauksen, ota yhteyttä saadaksesi rahasi takaisin tai elokuvalippusi.
 
 Terveisin,
-Leffaliput.fi
+Leffalippu.fi
 {{ EMAIL_ADDRESS }}
 {% endblock %}

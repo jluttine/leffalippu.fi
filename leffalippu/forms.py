@@ -21,7 +21,7 @@ from django.forms.formsets import BaseFormSet
 from django.forms.util import ErrorList
 from django.forms.forms import NON_FIELD_ERRORS
 
-from leffaliput.models import Order, Category, OrderedTickets
+from leffalippu.models import Order, Category, OrderedTickets
 
 # debugging
 import inspect

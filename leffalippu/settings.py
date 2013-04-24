@@ -1,4 +1,4 @@
-# Django settings for leffaliput project.
+# Django settings for leffalippu project.
 
 import os
 path = lambda x: os.path.join(os.path.abspath(os.path.dirname(__file__)), x)
@@ -25,7 +25,7 @@ DATABASES = {
 
 # Email settings. Use dummy settings here, overwrite in local_settings.py
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_ADDRESS = 'asiakaspalvelu@leffaliput.fi'
+EMAIL_ADDRESS = 'asiakaspalvelu@leffalippu.fi'
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -114,10 +114,10 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'leffaliput.urls'
+ROOT_URLCONF = 'leffalippu.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'leffaliput.wsgi.application'
+WSGI_APPLICATION = 'leffalippu.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -136,7 +136,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    'leffaliput',
+    'leffalippu',
     #'south',
     'mail_templated',
 )

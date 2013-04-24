@@ -3,7 +3,7 @@ Tilauksen {{ order.id }} vahvistus
 {% endblock %}
 
 {% block body %}
-Tähän sähköpostiosoitteeseen on tilattu elokuvalippuja palvelusta Leffaliput.fi. Mikäli olet saanut tämän viestin aiheetta, sinun ei tarvitse tehdä mitään.
+Tähän sähköpostiosoitteeseen on tilattu elokuvalippuja palvelusta Leffalippu.fi. Mikäli olet saanut tämän viestin aiheetta, sinun ei tarvitse tehdä mitään.
 
 Tilauksesi tunnus on {{ order.id }} ja sisältö on seuraavanlainen:
 {% for orderedtickets in order.orderedtickets_set.all %}
@@ -20,6 +20,6 @@ Voit perua tilauksen seuraavalla linkillä:
 {{ CANCEL_URL }}
 
 Ystävällisin terveisin,
-Leffaliput.fi
+Leffalippu.fi
 {{ EMAIL_ADDRESS }}
 {% endblock %}

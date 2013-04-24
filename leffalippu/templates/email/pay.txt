@@ -14,6 +14,6 @@ Viimeinen käyttöpäivä: {{ ticket.expires }}
 
 Kiitos ostoksestasi ja mukavia elokuvahetkiä!
 
-Leffaliput.fi
+Leffalippu.fi
 {{ EMAIL_ADDRESS }}
 {% endblock %}

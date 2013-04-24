@@ -14,7 +14,7 @@
 # <http://www.gnu.org/licenses/>.
 
 """
-Models for `leffaliput`.
+Models for `leffalippu`.
 """
 
 # NO! Don't reserve specific tickets when buying! Just reserve the

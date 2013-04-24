@@ -6,6 +6,6 @@ Tilaus {{ order.id }} peruutettu
 Olet perunut elokuvalipputilauksesi {{ order.id }}.
 
 Terveisin,
-Leffaliput.fi
+Leffalippu.fi
 {{ EMAIL_ADDRESS }}
 {% endblock %}

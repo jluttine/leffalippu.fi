@@ -16,7 +16,7 @@
 # <http://www.gnu.org/licenses/>.
 
 """
-Views for `leffaliput`.
+Views for `leffalippu`.
 """
 
 
@@ -35,8 +35,8 @@ from django.conf import settings
 
 from django.views.generic import View, TemplateView
 
-from leffaliput.models import *
-from leffaliput import forms
+from leffalippu.models import *
+from leffalippu import forms
 
 
 import string
@@ -73,7 +73,7 @@ def cancel(request, order_id):
                   [order.email])
         
     return render(request,
-                  'leffaliput/cancel.html',
+                  'leffalippu/cancel.html',
                   {
                       'order': order,
                       'CANCELLED': OrderStatus.CANCELLED,
@@ -146,7 +146,7 @@ def pay(request, order_id):
                   [order.email])
 
     return render(request,
-                  'leffaliput/pay.html',
+                  'leffalippu/pay.html',
                   {
                       'order': order,
                       'CANCELLED': OrderStatus.CANCELLED,
@@ -216,7 +216,7 @@ def order(request):
                           settings.EMAIL_ADDRESS,
                           [order.email])
                 return render(request,
-                              'leffaliput/order.html',
+                              'leffalippu/order.html',
                               {
                                   'order': order,
                               })
@@ -242,7 +242,7 @@ def order(request):
     
     
     return render(request, 
-                  'leffaliput/home.html',
+                  'leffalippu/home.html',
                   {
                       'order_form': order_form,
                       'category_formset': category_formset,
