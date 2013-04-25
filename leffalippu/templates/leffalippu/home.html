@@ -1,9 +1,7 @@
 {% extends "leffalippu/base.html" %}
 
 {% block content %}
-    <h1>Leffalippu edullisesti</h1>
-
-    <h2>Osta lippuja:</h2>
+    <h1>Osta leffalippuja edullisesti</h1>
 
     <form method="post" action="">
       {% csrf_token %}
@@ -64,13 +62,27 @@
         <label for="id_email">Sähköposti:</label>
         {{ order_form.email }} {{ order_form.email.errors }}
       </div>
+      <div class="fieldWrapper">
+        {{ order_form.captcha }} {{ order_form.captcha.errors }}
+      </div>
       <input type="submit" value="Osta liput" />
+      {# {{ order_form }} #}
     </form>
 
 {% endblock %}
 
 {% block javascript %}
 <script>
+$('.js-captcha-refresh').click(function(){
+    $form = $(this).parents('form');
+
+    $.getJSON($(this).data('url'), {}, function(json) {
+        // This your should update captcha image src and captcha hidden input
+    });
+
+    return false;
+});
+
    // This button will increment the value
     $(".qtyplus").click(function(e){
         // Stop acting like a button

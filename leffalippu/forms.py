@@ -23,12 +23,17 @@ from django.forms.forms import NON_FIELD_ERRORS
 
 from leffalippu.models import Order, Category, OrderedTickets
 
+from captcha.fields import ReCaptchaField
+#from captcha.fields import CaptchaField
+
 # debugging
 import inspect
 
 MAX_AMOUNT = 5
 
 class OrderForm(forms.ModelForm):
+
+    captcha = ReCaptchaField()
     
     class Meta:
         model = Order

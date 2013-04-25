@@ -103,6 +103,9 @@ SECRET_KEY = 'ykw0$v$-q811*0r^vl9j3m81jk=d3xwz5tkcwx+^84fwtm9@qp'
 #PRIVATE_URL_KEY = 'qwerty'
 # 8 character key for encrypted models
 CHAR8KEY = '8charkey'
+RECAPTCHA_PUBLIC_KEY = '76wtgdfsjhsydt7r5FFGFhgsdfytd656sad75fgh'
+RECAPTCHA_PRIVATE_KEY = '98dfg6df7g56df6gdfgdfg65JHJH656565GFGFGs'
+RECAPTCHA_USE_SSL = False
 
 
 # List of callables that know how to import templates from various sources.
@@ -148,6 +151,7 @@ INSTALLED_APPS = (
     #'south',
     'mail_templated',
     'django_cron',
+    'captcha',
 )
 
 # A sample logging configuration. The only tangible logging
