@@ -29,11 +29,14 @@ from captcha.fields import ReCaptchaField
 # debugging
 import inspect
 
+import bitcoin
+
 MAX_AMOUNT = 5
 
 class OrderForm(forms.ModelForm):
 
-    captcha = ReCaptchaField()
+    ## captcha = ReCaptchaField(attrs={'theme': 'clean',
+    ##                                 'lang': 'fi'})
     
     class Meta:
         model = Order
@@ -46,6 +49,9 @@ class OrderForm(forms.ModelForm):
         1) The email address doesn't have other open orders
         """
         cleaned_data = super(OrderForm, self).clean()
+
+        # TODO/FIXME: Check the email!
+        
         return cleaned_data
 
 class OrderedTicketsForm(forms.ModelForm):
@@ -159,6 +165,22 @@ class BaseOrderedTicketsFormSet(BaseFormSet):
                     OrderedTickets.objects.filter(order=order).delete()
                     return False
                 
-        return True
+        try:
+            (address, price) = bitcoin.create_payment(order)
+            order.bitcoin_address = address
+            order.price_satoshi = price
+            order.save()
+            return True
+        except Exception as e:
+            print(e)
+            # This error should happen only if the bitcoin payment could not be
+            # created, for instance, if blockchain.info or mtgox.com is down.
+            self._non_form_errors = ErrorList(["Maksua ei kyetty luomaan. "
+                                               "Käytetyt Bitcoin-palvelut "
+                                               "todennäköisesti tilapäisesti "
+                                               "poissa käytöstä. Yritä "
+                                               "myöhemmin uudelleen."])
+
+            return False
 
         

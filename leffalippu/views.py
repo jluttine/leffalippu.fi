@@ -38,12 +38,18 @@ from django.views.generic import View, TemplateView
 from leffalippu.models import *
 from leffalippu import forms
 
+import string
+import random
 
-## import string
-## import random
-## def id_generator(size=12, chars=string.ascii_uppercase + string.digits):
-##     return ''.join(random.choice(chars) for x in range(size))
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
 
+    
 #def cancel(request):
 def cancel(request, order_id):
     try:
@@ -198,13 +204,12 @@ def order(request):
             # Create the order
             order = order_form.save(commit=False)
             # Fill-in the missing fields
-            #order.status = 'O'
-            #order.private_key = id_generator()
-            import string
-            import random
+            order.ip = get_client_ip(request)
+            # Use temporary values for BTC address and price. They are
+            # overwritten by proper values when saving the formset.
             order.public_address = ''.join(random.choice(string.ascii_uppercase+string.digits) 
                                            for x in range(12))
-            order.ip = '192.128.1.1'
+            order.price_satoshi = 0
             order.save()
             if category_formset.save(order):
                 # Order succesfull. Send email and show summary
@@ -218,7 +223,6 @@ def order(request):
                           },
                           settings.EMAIL_ADDRESS,
                           [order.email])
-                #return HttpResponseRedirect(reverse(''))
                 return render(request,
                               'leffalippu/order.html',
                               {

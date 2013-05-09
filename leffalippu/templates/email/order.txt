@@ -3,21 +3,24 @@ Tilauksen {{ order.encrypted_pk }} vahvistus
 {% endblock %}
 
 {% block body %}
-Tähän sähköpostiosoitteeseen on tilattu elokuvalippuja palvelusta Leffalippu.fi. Mikäli olet saanut tämän viestin aiheetta, sinun ei tarvitse tehdä mitään.
+Tähän sähköpostiosoitteeseen on tilattu elokuvalippuja palvelusta Leffalippu.fi. Mikäli olet saanut tämän viestin aiheetta, voit jättää viestin huomiotta ja halutessasi ilmoittaa asiasta meille.
 
-Tilauksesi tunnus on {{ order.encrypted_pk }} ja sisältö on seuraavanlainen:
-{% for orderedtickets in order.orderedtickets_set.all %}
-{{ orderedtickets.amount }}kpl {{ orderedtickets.category }}{% endfor %}
-
-Hinta yhteensä: {{ order.price_in_euros }} euroa
-
-Tässä on lasku, joka täytyy maksaa 15 minuutin kuluessa tai tilaus umpeutuu automaattisesti:
-...
-
-HUOM! Kun olet maksanut tilauksen, saat lippusi tähän sähköpostiin eikä tilausta enää sen jälkeen voi peruuttaa.
-
-Voit perua tilauksen seuraavalla linkillä:
+Voit perua tilauksesi seuraavalla linkillä:
 {{ CANCEL_URL }}
+
+== Tilauksen tiedot ==
+Tunnus: {{ order.encrypted_pk }}
+Liput:
+{% for orderedtickets in order.orderedtickets_set.all %}  * {{ orderedtickets.amount }}kpl {{ orderedtickets.category }}
+{% endfor %}Hinta: {{ order.price_in_euros }} euroa
+
+== Lasku ==
+Bitcoin-osoite: {{ order.bitcoin_address }}
+Hinta: {{ order.price_in_bitcoins }} BTC
+Erääntyy: ?
+Mikäli tilausta ei makseta 15 minuutin kuluessa, tilaus umpeutuu automaattisesti.
+
+HUOM! Kun olet maksanut tilauksen, lähetämme lippusi tähän sähköpostiosoitteeseen eikä tilausta voi sen jälkeen enää peruuttaa.
 
 Ystävällisin terveisin,
 Leffalippu.fi

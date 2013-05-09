@@ -157,6 +157,9 @@ class Order(encrypted_models.EncryptedPKModel):
     
     """ The content of the reservation """
     tickets = models.ManyToManyField(Category, through='OrderedTickets')
+
+    """ The EUR price converted to bitcoins (in satoshi units) """
+    price_satoshi = models.BigIntegerField()
     
     def price(self):
         total_price = 0
@@ -166,6 +169,9 @@ class Order(encrypted_models.EncryptedPKModel):
 
     def price_in_euros(self):
         return "%.2f" % (self.price()/100.0,)
+
+    def price_in_bitcoins(self):
+        return "%.8f" % (self.price_satoshi * 1e-8)
 
     def cancel(self):
         pass
@@ -220,6 +226,9 @@ class Ticket(models.Model):
 
     """ Last valid day of the ticket """
     expires = models.DateField()
+
+    class Meta:
+        unique_together = (("number", "category"),)
 
     def __unicode__(self):
         return "%s %s (%s)" % (self.category, self.number, self.expires)

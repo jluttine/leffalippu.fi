@@ -25,7 +25,7 @@ DATABASES = {
 
 # Email settings. Use dummy settings here, overwrite in local_settings.py
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_ADDRESS = 'asiakaspalvelu@leffalippu.fi'
+EMAIL_ADDRESS = 'info@leffalippu.fi'
 
 CRON_CLASSES = [
     "leffalippu.models.ExpirationCronJob",
@@ -107,6 +107,13 @@ RECAPTCHA_PUBLIC_KEY = '76wtgdfsjhsydt7r5FFGFhgsdfytd656sad75fgh'
 RECAPTCHA_PRIVATE_KEY = '98dfg6df7g56df6gdfgdfg65JHJH656565GFGFGs'
 RECAPTCHA_USE_SSL = False
 
+BITCOIN_ADDRESS = '1GtBp71e33TDwbQHeZxo1dJdFmxVgfjrVu'
+
+# This URL is used as a base for blockchain.info payment system. You may want to
+# change it in order to make SSL/HTTPS work.
+CALLBACK_BASEURL = ''
+
+
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -116,6 +123,7 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
