@@ -160,6 +160,8 @@ def callback(request, encrypted_pk):
         print(e)
         raise Http404
 
+    print("Payment %.3fBTC received for %s" % (value*1e-8, order))
+    
     # Check whether the order is now paid
     total_paid = Transaction.objects.filter(order=order).aggregate(Sum('value'))['value__sum']
     if total_paid >= order.price_satoshi:
