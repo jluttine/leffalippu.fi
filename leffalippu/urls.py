@@ -1,5 +1,6 @@
 from django.conf.urls import patterns, include, url
 from leffalippu import views
+from leffalippu import bitcoin
 
 # Uncomment the next two lines to enable the admin:
 #from leffalippu import admin
@@ -11,10 +12,10 @@ urlpatterns = patterns('',
     #url(r'^$', 'leffalippu.views.home', name='home'),
     url(r'^$', views.order, name='order'),
     #url(r'^cancel/$', views.cancel, name='cancel'),
-    url(r'^cancel/(?P<order_id>.+)/$', views.cancel, name='cancel'),
-    url(r'^pay/(?P<order_id>.+)/$', views.pay, name='pay'),
+    url(r'^peru/(?P<order_id>.+)/$', views.cancel, name='cancel'),
+#url(r'^pay/(?P<order_id>.+)/$', views.pay, name='pay'),
 #url(r'^delete/(?P<order_id>.+)/$', views.delete, name='delete'),
-    url(r'^callback/(?P<order_id>.+)/$', views.callback, name='callback'),
+    url(r'^callback/(?P<encrypted_pk>.+)/$', bitcoin.callback, name='callback'),
 #url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
 #url(r'^$', views.OrderView.as_view(), name='order'),
     # url(r'^leffalippu/', include('leffalippu.foo.urls')),

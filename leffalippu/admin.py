@@ -21,6 +21,9 @@ Admin for `leffalippu`.
 from django.contrib import admin
 from leffalippu.models import *
 
+from django.http import Http404, HttpResponseRedirect, HttpResponse
+from django.core.urlresolvers import reverse
+
 from django.contrib.admin.sites import AdminSite
 
 from admin_views.admin import AdminViews
@@ -97,6 +100,29 @@ class OrderAdmin(AdminViews):
                           'paid_order_list': paid_order_list,
                       })
 
+    def get_urls(self):
+        urls = super(OrderAdmin, self).get_urls()
+        my_urls = patterns('',
+            url(r'^(?P<order_id>.+)/pay/$', self.admin_site.admin_view(self.pay_view),
+                name='leffalippu_order_pay'),
+        )
+        return my_urls + urls
+
+    def pay_view(self, request, order_id):
+        """
+        Complete the order by adding tickets to it and marking it paid.
+
+        This is for debugging purposes only. In production, do not let users access
+        this view.
+        """
+        try:
+            order = Order.objects.get(id=order_id)
+            order.pay()
+            return HttpResponseRedirect(reverse('admin:manager'))
+        except Order.DoesNotExist:
+            raise Http404
+
+
 class TransactionAdmin(admin.ModelAdmin):
     list_display = (
         'transaction_hash',
@@ -104,8 +130,8 @@ class TransactionAdmin(admin.ModelAdmin):
         'value',
         'input_address',
         'destination_address',
-        'confirmations',
-        'input_transaction_hash',
+    #'confirmations',
+    #'input_transaction_hash',
         'date',
         )
 
@@ -118,7 +144,7 @@ class TransactionAdmin(admin.ModelAdmin):
         'transaction_hash',
         'input_address',
         'destination_address',
-        'input_transaction_hash',
+    #'input_transaction_hash',
         )
 
         
