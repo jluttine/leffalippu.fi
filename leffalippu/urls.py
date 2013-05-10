@@ -15,6 +15,9 @@ urlpatterns = patterns('',
     url(r'^peru/(?P<order_id>.+)/$', views.cancel, name='cancel'),
 #url(r'^pay/(?P<order_id>.+)/$', views.pay, name='pay'),
 #url(r'^delete/(?P<order_id>.+)/$', views.delete, name='delete'),
+
+    # NOTE: This URL is hardcoded in bitcoin.py in order to be able to use
+    # totally different URLs for the callback (for instance, when using SSL)
     url(r'^callback/(?P<encrypted_pk>.+)/$', bitcoin.callback, name='callback'),
 #url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
 #url(r'^$', views.OrderView.as_view(), name='order'),
