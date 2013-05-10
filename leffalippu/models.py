@@ -62,22 +62,20 @@ class ExpirationCronJob(CronJobBase):
                 pass
         
     
-class CategoryManager(models.Manager):
+## class CategoryManager(models.Manager):
 
-    def OLD_with_amount_available(self):
-        # Amount of reserved/buyed tickets
-        category_list = self.annotate(amount_reserved=Sum('orderedtickets__amount'))
-        # Total amount of tickets
-        category_list = category_list.annotate(amount_total=Count('ticket'))
-        # Compute the number of available tickets
-        for category in category_list:
-            if category.amount_reserved:
-                category.amount_available = category.amount_total - category.amount_reserved
-            else:
-                category.amount_available = category.amount_total
-        return category_list
-
-
+##     def OLD_with_amount_available(self):
+##         # Amount of reserved/buyed tickets
+##         category_list = self.annotate(amount_reserved=Sum('orderedtickets__amount'))
+##         # Total amount of tickets
+##         category_list = category_list.annotate(amount_total=Count('ticket'))
+##         # Compute the number of available tickets
+##         for category in category_list:
+##             if category.amount_reserved:
+##                 category.amount_available = category.amount_total - category.amount_reserved
+##             else:
+##                 category.amount_available = category.amount_total
+##         return category_list
 
 class Category(models.Model):
     """
@@ -96,7 +94,7 @@ class Category(models.Model):
     """ Current selling price of the tickets in cents """
     price = models.PositiveIntegerField()
 
-    objects = CategoryManager()
+    #objects = CategoryManager()
 
     def __unicode__(self):
         return self.name
@@ -183,7 +181,8 @@ class Order(encrypted_models.EncryptedPKModel):
         pass
 
     def __unicode__(self):
-        return "%s %s" % (self.email, self.date)
+        return self.encrypted_pk
+    #return "%s %s" % (self.email, self.date)
 
 class OrderedTickets(models.Model):
     """
@@ -259,3 +258,34 @@ class PaidTicket(models.Model):
     orderstatus = models.ForeignKey(OrderStatus)
     #transaction = models.ForeignKey(Transaction)
 
+    
+class Transaction(models.Model):
+    """
+    A class for representing a bitcoin transaction from a customer.
+    """
+
+    """ The order that was paid """
+    order = models.ForeignKey(Order)
+
+    """ Received payment in satoshi """
+    value = models.BigIntegerField()
+
+    """ Address that received the transaction """
+    input_address = models.CharField(max_length=100)
+
+    """ Our destination address """
+    destination_address = models.CharField(max_length=100)
+    
+    """ Number of confirmations """
+    confirmations = models.IntegerField()
+    
+    """ Transaction hash to our destination address """
+    transaction_hash = models.CharField(max_length=100,
+                                        unique=True)
+    
+    """ Transaction hash to the input address """
+    input_transaction_hash = models.CharField(max_length=100)
+    
+    """ Timestamp of the transaction """
+    date = models.DateTimeField(auto_now_add=True)
+    

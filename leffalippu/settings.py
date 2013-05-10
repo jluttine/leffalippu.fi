@@ -113,6 +113,8 @@ CHAR8KEY = '8charkey'
 RECAPTCHA_PUBLIC_KEY = '76wtgdfsjhsydt7r5FFGFhgsdfytd656sad75fgh'
 RECAPTCHA_PRIVATE_KEY = '98dfg6df7g56df6gdfgdfg65JHJH656565GFGFGs'
 RECAPTCHA_USE_SSL = False
+CALLBACK_KEY = '8sfjk230sdfkl2340askl1249jf0'
+
 
 BITCOIN_ADDRESS = '1GtBp71e33TDwbQHeZxo1dJdFmxVgfjrVu'
 
@@ -149,6 +151,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    path('templates/')
 )
 
 INSTALLED_APPS = (
@@ -166,7 +169,8 @@ INSTALLED_APPS = (
     #'south',
     'mail_templated',
     'django_cron',
-    'captcha',
+    #'captcha',
+    'admin_views',
 )
 
 # A sample logging configuration. The only tangible logging

@@ -20,7 +20,7 @@ Views for `leffalippu`.
 """
 
 
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.db.models import Count, Sum
 from django.forms.models import modelformset_factory, inlineformset_factory
@@ -87,16 +87,87 @@ def cancel(request, order_id):
                       'EXPIRED': OrderStatus.EXPIRED,
                   })
         
+def callback(request, order_id):
+    """
+    A callback for blockchain.info payment system.
 
-def pay(request, order_id):
+    The customer pays to the input address and blockchain.info forwards the
+    payment to our destination address.
     """
-    Complete the order by adding tickets to it and marking it paid.
-    """
+    
+    if request.method != 'GET':
+        raise Http404
+    
     try:
+        # Get the order
         order = Order.objects.get(encrypted_pk=order_id)
     except Order.DoesNotExist:
         raise Http404
 
+    # Parse the parameters
+    try:
+        # Received payment in satoshi
+        value = long(request.GET['value'])
+        # Address that received the transaction
+        input_address = request.GET['input_address']
+        # Our destination address
+        destination_address = request.GET['destination_address']
+        # Number of confirmations
+        confirmations = int(request.GET['confirmations'])
+        # Tx hash to our destination address
+        transaction_hash = request.GET['transaction_hash']
+        # Tx hash to the input address
+        input_transaction_hash = request.GET['input_transaction_hash']
+        # Custom parameter
+        secret = request.GET['secret']
+    except KeyError:
+        print("Missing parameters in the callback")
+        raise Http404
+
+    # Check SSL?
+
+    
+    # Check secret
+    if secret != settings.CALLBACK_KEY:
+        print("Wrong secret key")
+        raise Http404
+
+    # Enough confirmations?
+    if confirmations < 0:
+        print("Not enough confirmations")
+        raise Http404
+    
+    # Store the transaction
+    transaction = Transaction(order=order,
+                              value=value,
+                              input_address=input_address,
+                              destination_address=destination_address,
+                              confirmations=confirmations,
+                              transaction_hash=transaction_hash,
+                              input_transaction_hash=input_transaction_hash)
+    try:
+        transaction.save()
+    except Exception as e:
+        print(e)
+        raise Http404
+
+    # Check whether the order is now paid
+    total_paid = Transaction.objects.filter(order=order).aggregate(Sum('value'))['value__sum']
+    if total_paid >= order.price_satoshi:
+        try:
+            pay_order(order)
+        except:
+            # The order could not be set to paid state. Either the order has
+            # already expired or been cancelled, or there is a bug in the system
+            # such that there are not enough tickets available
+            #
+            # TODO/FIXME: Some error message to logs?
+            pass
+
+    # Return *ok*
+    return HttpResponse("*ok*")
+
+def pay_order(order):
     # Only open orders can be paid, so check that orderstatus does not exist.
     try:
         order.status = order.orderstatus.status
@@ -151,27 +222,45 @@ def pay(request, order_id):
                   settings.EMAIL_ADDRESS,
                   [order.email])
 
-    return render(request,
-                  'leffalippu/pay.html',
-                  {
-                      'order': order,
-                      'CANCELLED': OrderStatus.CANCELLED,
-                      'PAID': OrderStatus.PAID,
-                      'EXPIRED': OrderStatus.EXPIRED,
-                  })
+@login_required
+def pay(request, order_id):
+    """
+    Complete the order by adding tickets to it and marking it paid.
 
-def delete(request, order_id):
+    This is for debugging purposes only. In production, do not let users access
+    this view.
+    """
     # TODO/FIXME: Check permissions!
     try:
         order = Order.objects.get(encrypted_pk=order_id)
-        # Delete ticket payments for this order
-        #PaidTicket.objects.filter(orderstatus__order=order).delete()
-        # Delete the order
-        order.delete()
+        pay_order(order)
         return HttpResponseRedirect(reverse('admin:manager'))
-    #return HttpResponseRedirect(reverse('manager', args=(request, order_id,)))
     except Order.DoesNotExist:
         raise Http404
+
+    ## return render(request,
+    ##               'leffalippu/pay.html',
+    ##               {
+    ##                   'order': order,
+    ##                   'CANCELLED': OrderStatus.CANCELLED,
+    ##                   'PAID': OrderStatus.PAID,
+    ##                   'EXPIRED': OrderStatus.EXPIRED,
+    ##               })
+
+    
+## @login_required
+## def delete(request, order_id):
+##     # TODO/FIXME: Check permissions!
+##     try:
+##         order = Order.objects.get(encrypted_pk=order_id)
+##         # Delete ticket payments for this order
+##         #PaidTicket.objects.filter(orderstatus__order=order).delete()
+##         # Delete the order
+##         order.delete()
+##         return HttpResponseRedirect(reverse('admin:manager'))
+##     #return HttpResponseRedirect(reverse('manager', args=(request, order_id,)))
+##     except Order.DoesNotExist:
+##         raise Http404
 
 def order(request):
 
