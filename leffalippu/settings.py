@@ -106,10 +106,12 @@ CHAR8KEY = '8charkey'
 RECAPTCHA_PUBLIC_KEY = '76wtgdfsjhsydt7r5FFGFhgsdfytd656sad75fgh'
 RECAPTCHA_PRIVATE_KEY = '98dfg6df7g56df6gdfgdfg65JHJH656565GFGFGs'
 RECAPTCHA_USE_SSL = False
-CALLBACK_KEY = '8sfjk230sdfkl2340askl1249jf0'
+CALLBACK_CHAR8KEY = '8charkey'
+CALLBACK_SECRET = 'sfjk230sdfkl' # maybe not necessary
 
 
 BITCOIN_ADDRESS = '1GtBp71e33TDwbQHeZxo1dJdFmxVgfjrVu'
+BITCOIN_FEE = 0.6
 
 # This URL is used as a base for blockchain.info payment system. You may want to
 # change it in order to make SSL/HTTPS work.

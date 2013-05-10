@@ -28,13 +28,17 @@ from django.db.models import Count, Sum, Q
 
 import encrypted_models
 
+from mail_templated import send_mail
+
+from django.conf import settings
+
 # A cron job for finding expired orders.
 # Add to crontab: python manage.py runcrons
 from django_cron import CronJobBase, Schedule
 from mail_templated import send_mail
 import datetime
 from django.utils import timezone
-from django.conf import settings
+
 class ExpirationCronJob(CronJobBase):
     RUN_EVERY_MINS = 1 # every minute
 
@@ -177,12 +181,64 @@ class Order(encrypted_models.EncryptedPKModel):
     def expire(self):
         pass
 
-    def pay(self):
-        pass
-
     def __unicode__(self):
         return self.encrypted_pk
     #return "%s %s" % (self.email, self.date)
+
+    def pay(self):
+        # Only open orders can be paid, so check that orderstatus does not exist.
+        try:
+            self.status = self.orderstatus.status
+        except OrderStatus.DoesNotExist:
+            orderstatus = OrderStatus(order=self,
+                                      status=OrderStatus.PAID)
+            try:
+                orderstatus.save()
+                self.status = orderstatus.status
+            except:
+                raise Exception("Order could not be paid. Handle this situation.")
+
+            # Add tickets to it
+            for ordered_tickets in self.orderedtickets_set.all(): #OrderedTickets.objects.filter(order=self):
+                category = ordered_tickets.category
+                amount = ordered_tickets.amount
+                tickets = Ticket.objects.filter(category=category,
+                                                paidticket=None).order_by('expires')
+                if len(tickets) < amount:
+                    # This should not happen: A customer has paid for more
+                    # tickets than we have available. If this ever
+                    # happens, it means there's a bug in this system.
+                    raise Exception("Serious bug in the system. Not enough tickets available.")
+                amount_given = 0
+                for ticket in tickets[:amount]:
+                    if amount_given == amount:
+                        break
+                    paid_ticket = PaidTicket(ticket=ticket, orderstatus=orderstatus)
+                    try:
+                        paid_ticket.save()
+                        amount_given += 1
+                    except:
+                        # This may happen extremely rarely: Someone has
+                        # bought a ticket that was available when we
+                        # filtered. This may happen if several customers
+                        # are paying at the same time. However, there
+                        # should be enough tickets available, so no need
+                        # to worry.
+                        pass
+                if PaidTicket.objects.filter(orderstatus=orderstatus).count() != amount:
+                    # This should not happen: The system was not able to
+                    # provide enough tickets for the customer.
+                    raise Exception("Serious bug in the system. Not enough tickets given to the customer.")
+
+            tickets = Ticket.objects.filter(paidticket__orderstatus=orderstatus)
+            send_mail('email/pay.txt',
+                      {
+                          'order': self,
+                          'tickets': tickets,
+                          'EMAIL_ADDRESS': settings.EMAIL_ADDRESS,
+                      },
+                      settings.EMAIL_ADDRESS,
+                      [self.email])
 
 class OrderedTickets(models.Model):
     """

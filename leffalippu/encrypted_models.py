@@ -4,31 +4,33 @@
 # Inspired by this StackOverflow question:
 #http://stackoverflow.com/questions/3295405/creating-django-objects-with-a-random-primary-key
  
-import struct
-from Crypto.Cipher import DES
+## import struct
+## from Crypto.Cipher import DES
+import crypto
+
 from django.db import models
 
 from django.conf import settings
 
-def base36encode(number):
-    """Encode number to string of alphanumeric characters (0 to z). (Code taken from Wikipedia)."""
-    if not isinstance(number, (int, long)):
-        raise TypeError('number must be an integer')
-    if number < 0:
-        raise ValueError('number must be positive')
+## def base36encode(number):
+##     """Encode number to string of alphanumeric characters (0 to z). (Code taken from Wikipedia)."""
+##     if not isinstance(number, (int, long)):
+##         raise TypeError('number must be an integer')
+##     if number < 0:
+##         raise ValueError('number must be positive')
 
-    alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'
-    base36 = ''
-    while number:
-        number, i = divmod(number, 36)
-        base36 = alphabet[i] + base36
+##     alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'
+##     base36 = ''
+##     while number:
+##         number, i = divmod(number, 36)
+##         base36 = alphabet[i] + base36
 
-    return base36 or alphabet[0]
+##     return base36 or alphabet[0]
 
 
-def base36decode(numstr):
-    """Convert a base-36 string (made of alphanumeric characters) to its numeric value."""
-    return int(numstr,36)
+## def base36decode(numstr):
+##     """Convert a base-36 string (made of alphanumeric characters) to its numeric value."""
+##     return int(numstr,36)
 
 
 class EncryptedPKModelManager(models.Manager):
@@ -37,15 +39,17 @@ class EncryptedPKModelManager(models.Manager):
         encrypted_pk = kwargs.pop('encrypted_pk', None)
         if encrypted_pk:
             # If found, decrypt encrypted_pk argument and set pk argument to the appropriate value
-            kwargs['pk'] = struct.unpack('<Q', self.model.encryption_obj.decrypt(
-                struct.pack('<Q', base36decode(encrypted_pk))
-            ))[0]
+            kwargs['pk'] = self.model.encryption_obj.decrypt(encrypted_pk)
+            ## kwargs['pk'] = struct.unpack('<Q', self.model.encryption_obj.decrypt(
+            ##     struct.pack('<Q', base36decode(encrypted_pk))
+            ## ))[0]
         return super(EncryptedPKModelManager, self).get(*args, **kwargs)
 
 
 class EncryptedPKModel(models.Model):
     """Adds encrypted_pk property to children which returns the encrypted value of the primary key."""
-    encryption_obj = DES.new(settings.CHAR8KEY)
+    encryption_obj = crypto.KeyCrypto(settings.CHAR8KEY)
+    #encryption_obj = DES.new(settings.CHAR8KEY)
 
     def __init__(self, *args, **kwargs):
         super(EncryptedPKModel, self).__init__(*args, **kwargs)
@@ -56,9 +60,10 @@ class EncryptedPKModel(models.Model):
         )
 
     def _encrypted_pk(self):
-        return base36encode(struct.unpack('<Q', self.encryption_obj.encrypt(
-            str(struct.pack('<Q', self.pk))
-        ))[0])
+        return self.encryption_obj.encrypt(self.pk)
+        ## return base36encode(struct.unpack('<Q', self.encryption_obj.encrypt(
+        ##     str(struct.pack('<Q', self.pk))
+        ## ))[0])
 
     encrypted_pk = property(_encrypted_pk)
 

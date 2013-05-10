@@ -25,7 +25,7 @@ from django.shortcuts import render
 from django.db.models import Count, Sum
 from django.forms.models import modelformset_factory, inlineformset_factory
 from django.forms.formsets import formset_factory
-from django.contrib.auth.decorators import login_required
+#from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 
 #from django.core import mail
@@ -87,156 +87,23 @@ def cancel(request, order_id):
                       'EXPIRED': OrderStatus.EXPIRED,
                   })
         
-def callback(request, order_id):
-    """
-    A callback for blockchain.info payment system.
 
-    The customer pays to the input address and blockchain.info forwards the
-    payment to our destination address.
-    """
-    
-    if request.method != 'GET':
-        raise Http404
-    
-    try:
-        # Get the order
-        order = Order.objects.get(encrypted_pk=order_id)
-    except Order.DoesNotExist:
-        raise Http404
 
-    # Parse the parameters
-    try:
-        # Received payment in satoshi
-        value = long(request.GET['value'])
-        # Address that received the transaction
-        input_address = request.GET['input_address']
-        # Our destination address
-        destination_address = request.GET['destination_address']
-        # Number of confirmations
-        confirmations = int(request.GET['confirmations'])
-        # Tx hash to our destination address
-        transaction_hash = request.GET['transaction_hash']
-        # Tx hash to the input address
-        input_transaction_hash = request.GET['input_transaction_hash']
-        # Custom parameter
-        secret = request.GET['secret']
-    except KeyError:
-        print("Missing parameters in the callback")
-        raise Http404
+## @login_required
+## def pay(request, order_id):
+##     """
+##     Complete the order by adding tickets to it and marking it paid.
 
-    # Check SSL?
-
-    
-    # Check secret
-    if secret != settings.CALLBACK_KEY:
-        print("Wrong secret key")
-        raise Http404
-
-    # Enough confirmations?
-    if confirmations < 0:
-        print("Not enough confirmations")
-        raise Http404
-    
-    # Store the transaction
-    transaction = Transaction(order=order,
-                              value=value,
-                              input_address=input_address,
-                              destination_address=destination_address,
-                              confirmations=confirmations,
-                              transaction_hash=transaction_hash,
-                              input_transaction_hash=input_transaction_hash)
-    try:
-        transaction.save()
-    except Exception as e:
-        print(e)
-        raise Http404
-
-    # Check whether the order is now paid
-    total_paid = Transaction.objects.filter(order=order).aggregate(Sum('value'))['value__sum']
-    if total_paid >= order.price_satoshi:
-        try:
-            pay_order(order)
-        except:
-            # The order could not be set to paid state. Either the order has
-            # already expired or been cancelled, or there is a bug in the system
-            # such that there are not enough tickets available
-            #
-            # TODO/FIXME: Some error message to logs?
-            pass
-
-    # Return *ok*
-    return HttpResponse("*ok*")
-
-def pay_order(order):
-    # Only open orders can be paid, so check that orderstatus does not exist.
-    try:
-        order.status = order.orderstatus.status
-    except OrderStatus.DoesNotExist:
-        orderstatus = OrderStatus(order=order,
-                                  status=OrderStatus.PAID)
-        try:
-            orderstatus.save()
-            order.status = orderstatus.status
-        except:
-            raise Exception("Order could not be paid. Handle this situation.")
-    
-        # Add tickets to it
-        for ordered_tickets in OrderedTickets.objects.filter(order=order):
-            category = ordered_tickets.category
-            amount = ordered_tickets.amount
-            tickets = Ticket.objects.filter(category=category,
-                                            paidticket=None).order_by('expires')
-            if len(tickets) < amount:
-                # This should not happen: A customer has paid for more
-                # tickets than we have available. If this ever
-                # happens, it means there's a bug in this system.
-                raise Exception("Serious bug in the system. Not enough tickets available.")
-            amount_given = 0
-            for ticket in tickets[:amount]:
-                if amount_given == amount:
-                    break
-                paid_ticket = PaidTicket(ticket=ticket, orderstatus=orderstatus)
-                try:
-                    paid_ticket.save()
-                    amount_given += 1
-                except:
-                    # This may happen extremely rarely: Someone has
-                    # bought a ticket that was available when we
-                    # filtered. This may happen if several customers
-                    # are paying at the same time. However, there
-                    # should be enough tickets available, so no need
-                    # to worry.
-                    pass
-            if PaidTicket.objects.filter(orderstatus=orderstatus).count() != amount:
-                # This should not happen: The system was not able to
-                # provide enough tickets for the customer.
-                raise Exception("Serious bug in the system. Not enough tickets given to the customer.")
-
-        tickets = Ticket.objects.filter(paidticket__orderstatus=orderstatus)
-        send_mail('email/pay.txt',
-                  {
-                      'order': order,
-                      'tickets': tickets,
-                      'EMAIL_ADDRESS': settings.EMAIL_ADDRESS,
-                  },
-                  settings.EMAIL_ADDRESS,
-                  [order.email])
-
-@login_required
-def pay(request, order_id):
-    """
-    Complete the order by adding tickets to it and marking it paid.
-
-    This is for debugging purposes only. In production, do not let users access
-    this view.
-    """
-    # TODO/FIXME: Check permissions!
-    try:
-        order = Order.objects.get(encrypted_pk=order_id)
-        pay_order(order)
-        return HttpResponseRedirect(reverse('admin:manager'))
-    except Order.DoesNotExist:
-        raise Http404
+##     This is for debugging purposes only. In production, do not let users access
+##     this view.
+##     """
+##     # TODO/FIXME: Check permissions!
+##     try:
+##         order = Order.objects.get(encrypted_pk=order_id)
+##         pay_order(order)
+##         return HttpResponseRedirect(reverse('admin:manager'))
+##     except Order.DoesNotExist:
+##         raise Http404
 
     ## return render(request,
     ##               'leffalippu/pay.html',

@@ -3,6 +3,18 @@ import simplejson
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
+from django.http import Http404, HttpResponseRedirect, HttpResponse
+
+from leffalippu.models import Order, Transaction
+
+from django.db.models import Sum
+
+import crypto
+
+from django.conf import settings
+
+callback_crypto = crypto.KeyCrypto(settings.CALLBACK_CHAR8KEY)
+
 def get_json(url):
     """
     Get JSON response from an URL and return it as a nested dictionary.
@@ -44,8 +56,9 @@ def cents_to_satoshi(cents):
     """
     try: 
         # Conversion rate: satoshi/cents
-        rate = long(1.0e6 / get_rate_mtgox())
-        #rate = long(1.0e6 / get_rate_blockchain())
+        fee_fix = 1.0 - settings.BITCOIN_FEE/100.0
+        rate = long(1.0e6 / (fee_fix * get_rate_mtgox()))
+        #rate = long(1.0e6 / (fee_fix * get_rate_blockchain()))
 
         # Price in bitcoins (satoshi units)
         satoshi = cents * rate
@@ -61,11 +74,13 @@ def create_payment(order):
     Create a bitcoin address and compute the price in bitcoins for an order.
     """
     # Get payment address
+    encrypted_pk = callback_crypto.encrypt(order.pk)
+    secret = settings.CALLBACK_SECRET
     address = get_bitcoin_address(settings.BITCOIN_ADDRESS,
                                   False,
                                   (settings.CALLBACK_BASEURL +
-                                   reverse('pay', args=[order.encrypted_pk]) +
-                                   "?secret=%s" % settings.CALLBACK_KEY))
+                                   reverse('callback', args=[encrypted_pk]) +
+                                   "?secret=%s" % secret))
 
     # Get price in bitcoins (units=satoshi)
     price = cents_to_satoshi(order.price())
@@ -74,4 +89,85 @@ def create_payment(order):
         raise Exception()
 
     return (address, price)
+    
+def callback(request, encrypted_pk):
+    """
+    A callback for blockchain.info payment system.
+
+    The customer pays to the input address and blockchain.info forwards the
+    payment to our destination address.
+    """
+    
+    if request.method != 'GET':
+        raise Http404
+    
+    try:
+        # Get the order
+        order_pk = callback_crypto.decrypt(encrypted_pk)
+        order = Order.objects.get(pk=order_pk)
+    except Order.DoesNotExist:
+        raise Http404
+
+    # Parse the parameters
+    try:
+        # Received payment in satoshi
+        value = long(request.GET['value'])
+        # Address that received the transaction
+        input_address = request.GET['input_address']
+        # Our destination address
+        destination_address = request.GET['destination_address']
+        # Number of confirmations
+        confirmations = int(request.GET['confirmations'])
+        # Tx hash to our destination address
+        transaction_hash = request.GET['transaction_hash']
+        # Tx hash to the input address
+        input_transaction_hash = request.GET['input_transaction_hash']
+        # Custom parameter
+        secret = request.GET['secret']
+    except KeyError:
+        print("Missing parameters in the callback")
+        raise Http404
+
+    # Check SSL?
+
+    
+    # Check secret
+    if secret != settings.CALLBACK_SECRET:
+        print("Wrong secret key")
+        raise Http404
+
+    # Enough confirmations?
+    if confirmations < 0:
+        print("Not enough confirmations")
+        raise Http404
+    
+    # Store the transaction
+    transaction = Transaction(order=order,
+                              value=value,
+                              input_address=input_address,
+                              destination_address=destination_address,
+                              confirmations=confirmations,
+                              transaction_hash=transaction_hash,
+                              input_transaction_hash=input_transaction_hash)
+    try:
+        transaction.save()
+    except Exception as e:
+        print(e)
+        raise Http404
+
+    # Check whether the order is now paid
+    total_paid = Transaction.objects.filter(order=order).aggregate(Sum('value'))['value__sum']
+    if total_paid >= order.price_satoshi:
+        try:
+            order.pay()
+        except:
+            # The order could not be set to paid state. Either the order has
+            # already expired or been cancelled, or there is a bug in the system
+            # such that there are not enough tickets available
+            #
+            # TODO/FIXME: Some error message to logs?
+            pass
+
+    # Return *ok*
+    return HttpResponse("*ok*")
     
