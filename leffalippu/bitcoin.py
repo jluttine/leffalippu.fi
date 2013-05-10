@@ -87,11 +87,11 @@ def create_payment(order):
     url = (settings.CALLBACK_BASEURL +
            "/callback/" + 
            encrypted_pk +
-    #reverse('callback', args=[encrypted_pk]) +
            "/?secret=%s" % secret)
     print("Callback URL: %s" % url)
+    shared = True
     address = get_bitcoin_address(settings.BITCOIN_ADDRESS,
-                                  False,
+                                  shared, # shared? True/False
                                   url)
 
     # Get price in bitcoins (units=satoshi)
