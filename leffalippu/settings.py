@@ -26,6 +26,13 @@ DATABASES = {
 # Email settings. Use dummy settings here, overwrite in local_settings.py
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_ADDRESS = 'info@leffalippu.fi'
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#EMAIL_HOST = 'host.com'
+#EMAIL_PORT = 25
+#EMAIL_HOST_USER = 'username'
+#EMAIL_HOST_PASSWORD = 'password'
+#EMAIL_USE_TLS = False
+
 
 CRON_CLASSES = [
     "leffalippu.models.ExpirationCronJob",
@@ -72,7 +79,7 @@ MEDIA_URL = '/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = path('static/')
+STATIC_ROOT = path('sitestatic/')
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
