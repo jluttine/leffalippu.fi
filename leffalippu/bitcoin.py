@@ -74,17 +74,24 @@ def create_payment(order):
     Create a bitcoin address and compute the price in bitcoins for an order.
     """
     # Get payment address
+    print("hello")
     encrypted_pk = callback_crypto.encrypt(order.pk)
     secret = settings.CALLBACK_SECRET
+    url = (settings.CALLBACK_BASEURL +
+           reverse('callback', args=[encrypted_pk]) +
+           "?secret=%s" % secret)
+    print("hello", url)
     address = get_bitcoin_address(settings.BITCOIN_ADDRESS,
                                   False,
                                   (settings.CALLBACK_BASEURL +
                                    reverse('callback', args=[encrypted_pk]) +
                                    "?secret=%s" % secret))
 
+    print("hello")
     # Get price in bitcoins (units=satoshi)
     price = cents_to_satoshi(order.price())
 
+    print("hello")
     if price is None or address is None:
         raise Exception()
 

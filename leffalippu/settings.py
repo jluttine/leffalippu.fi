@@ -115,7 +115,8 @@ BITCOIN_FEE = 0.6
 
 # This URL is used as a base for blockchain.info payment system. You may want to
 # change it in order to make SSL/HTTPS work.
-CALLBACK_BASEURL = ''
+# CHANGE THIS in local_settings.py
+CALLBACK_BASEURL = 'https://domain.com'
 
 
 

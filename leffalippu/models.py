@@ -263,6 +263,9 @@ class OrderedTickets(models.Model):
     class Meta:
         unique_together = (("order", "category"),)
 
+    def __unicode__(self):
+        return "%d x %s @ %s" % (self.amount, self.category, self.order.encrypted_pk)
+
 class Ticket(models.Model):
     """
     A movie ticket.
@@ -305,6 +308,9 @@ class OrderStatus(models.Model):
     status = models.CharField(max_length=1,
                               choices=STATUS_CHOICES)
     
+    def __unicode__(self):
+        return "%s" % (self.get_status_display())
+    
 class PaidTicket(models.Model):
 
     """ Ticket that was bought """
@@ -345,3 +351,5 @@ class Transaction(models.Model):
     """ Timestamp of the transaction """
     date = models.DateTimeField(auto_now_add=True)
     
+    def __unicode__(self):
+        return "%s" % (self.transaction_hash)
