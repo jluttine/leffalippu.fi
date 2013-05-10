@@ -1,6 +1,7 @@
 Django==1.5.1
 South==0.7.6
 argparse==1.2.1
+django-admin-views==0.1.4
 django-common-helpers==0.4
 django-cron==0.2.8
 django-mail-templated==0.2.0
