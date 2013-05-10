@@ -33,7 +33,8 @@
     <br />
     Hinta: {{ order.price }}<br />
     <a href="{% url 'cancel' order.encrypted_pk %}">Peru</a>
-    <a href="{% url 'pay' order.encrypted_pk %}">Maksa</a><br />
+    <a href="{% url 'pay' order.encrypted_pk %}">Maksa</a>
+    <a href="{% url 'admin:leffalippu_order_delete' order.id %}">Poista</a><br />
     <ul>
       {% for orderedtickets in order.orderedtickets_set.all %}
       <li>{{ orderedtickets.category }} {{ orderedtickets.amount }}kpl</li>
@@ -47,7 +48,7 @@
     <br />
     <a href="{% url 'cancel' order.encrypted_pk %}">Peru</a>
     <a href="{% url 'pay' order.encrypted_pk %}">Maksa</a>
-    <a href="{% url 'delete' order.encrypted_pk %}">Poista</a><br />
+    <a href="{% url 'admin:leffalippu_order_delete' order.id %}">Poista</a><br />
     <ul>
       {% for orderedtickets in order.orderedtickets_set.all %}
       <li>{{ orderedtickets.amount }} x {{ orderedtickets.category }}</li>
@@ -74,7 +75,7 @@
     <br />
     <a href="{% url 'cancel' order.encrypted_pk %}">Peru</a>
     <a href="{% url 'pay' order.encrypted_pk %}">Maksa</a>
-    <a href="{% url 'delete' order.encrypted_pk %}">Poista</a><br />
+    <a href="{% url 'admin:leffalippu_order_delete' order.id %}">Poista</a><br />
     Hinta: {{ order.price }}<br />
     Maksuhetki: {{ order.orderstatus.date }}<br />
     <ul>
