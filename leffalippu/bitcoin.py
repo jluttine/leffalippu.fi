@@ -25,11 +25,18 @@ def get_json(url):
     return simplejson.load(f)
 
 def get_bitcoin_address(receiving_address, shared, callback_url):
+    """
+    Get a new bitcoin address and set a notifier for it.
+    """
     blockchain_url = 'https://blockchain.info/api/receive?method=create&address=%s&shared=%g&callback=%s' % (receiving_address, shared, callback_url)
 
-    blockchain_json = get_json(blockchain_url)
-    payment_address = blockchain_json['input_address']
-    return payment_address
+    try:
+        blockchain_json = get_json(blockchain_url)
+        payment_address = blockchain_json['input_address']
+        return payment_address
+    except Exception as e:
+        print(e)
+        return None
 
 def get_rate_mtgox():
     """
@@ -160,7 +167,7 @@ def callback(request, encrypted_pk):
         print(e)
         raise Http404
 
-    print("Payment %.3fBTC received for %s" % (value*1e-8, order))
+    print("Payment %.5fBTC received for %s" % (value*1e-8, order))
     
     # Check whether the order is now paid
     total_paid = Transaction.objects.filter(order=order).aggregate(Sum('value'))['value__sum']

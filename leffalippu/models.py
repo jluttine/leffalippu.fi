@@ -113,6 +113,9 @@ class Category(models.Model):
             return (amount_total - amount_ordered)
         else:
             return amount_total
+
+    def price_in_euros(self):
+        return self.price/100.0 #".2f" % (self.price/100.0)
         
         
 

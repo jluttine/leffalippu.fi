@@ -3,6 +3,8 @@
 {% block content %}
     <h1>Osta leffalippuja edullisesti</h1>
 
+    <b>HUOM! Palvelu ei ole vielä toiminnassa eikä kelvollisia lippuja ole vielä myynnissä.</b>
+
     <form method="post" action="">
       {% csrf_token %}
       {{ category_formset.management_form }}
@@ -19,7 +21,7 @@
           {% for form in category_formset %}
           <tr>
             <td>{{ form.instance.category.name }}{{ form.fields.category.initial.name }}{{ form.category }}</td>
-            <td>{{ form.instance.category.price }}{{ form.fields.category.initial.price }}</td>
+            <td>{{ form.instance.category.price_in_euros|stringformat:".2f" }}{{ form.fields.category.initial.price_in_euros|stringformat:".2f" }}€</td>
             <td>
             <input type="button" 
                    value="+" 
@@ -65,6 +67,7 @@
       <div class="fieldWrapper">
         {{ order_form.captcha }} {{ order_form.captcha.errors }}
       </div>
+      <b>HUOM! Palvelu ei ole vielä toiminnassa eikä kelvollisia lippuja ole vielä myynnissä.</b><br />
       <input type="submit" value="Osta liput" />
       {# {{ order_form }} #}
     </form>
