@@ -1,5 +1,5 @@
 {% block subject %}
-Tilauksen {{ order.encrypted_pk }} vahvistus
+Tilausvahvistus
 {% endblock %}
 
 {% block body %}

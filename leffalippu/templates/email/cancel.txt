@@ -1,5 +1,5 @@
 {% block subject %}
-Tilaus {{ order.encrypted_pk }} peruutettu
+Tilaus peruttu
 {% endblock %}
 
 {% block body %}
