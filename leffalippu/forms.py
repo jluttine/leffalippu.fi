@@ -41,6 +41,9 @@ class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
         fields = ('email',)
+        widgets = { 
+        #'email': forms.TextInput(attrs={'placeholder': u'sähköposti'}),
+        }   
 
     def clean(self):
         """

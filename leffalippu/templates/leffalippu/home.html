@@ -1,14 +1,14 @@
 {% extends "leffalippu/base.html" %}
 
 {% block content %}
-    <h1>Osta leffalippuja edullisesti</h1>
+    <h1>Osta leffalippuja edullisesti bitcoineilla</h1>
 
-    <b>HUOM! Palvelu ei ole vielä toiminnassa eikä kelvollisia lippuja ole vielä myynnissä.</b>
+    <div class="alert">HUOM! Palvelu ei ole vielä toiminnassa eikä kelvollisia lippuja ole vielä myynnissä.</div>
 
-    <form method="post" action="">
+    <form method="post" action="" class="well form-inline">
       {% csrf_token %}
       {{ category_formset.management_form }}
-      <table>
+      <table class="table">
         <thead>
           <tr>
             <th>Lippu</th>
@@ -25,24 +25,24 @@
             <td>
             <input type="button" 
                    value="+" 
-                   class="qtyplus"
+                   class="qtyplus btn btn-mini"
                    field="{{ form.amount.html_name }}"
                    maxvalue="{{ form.fields.amount.max_value }}" />
             <input type="text" 
                    name="{{ form.amount.html_name }}" 
                    value="{{ form.amount.value }}" 
-                   class="qty" 
-                   maxlength="1" 
-                   {# onchange="update_total_amount()" #}
-            />
+                   class="qty span1" 
+                   maxlength="1" />
             <input type="button" 
                    value="-" 
-                   class="qtyminus" 
+                   class="qtyminus btn btn-mini" 
                    field="{{ form.amount.html_name }}" 
                    minvalue="{{ form.fields.amount.min_value }}" />
+            <div class="alert-error">
+              {{ form.amount.errors }}{{ form.non_field_errors }}
+            </div>
             </td>
             <td>{{ form.fields.amount.available }}</td>
-            <td>{{ form.amount.errors }}{{ form.non_field_errors }}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -58,19 +58,41 @@
         </tfoot>
         -->
       </table>
-      {{ category_formset.non_form_errors }}
-      {{ order_form.non_field_errors }}
+      <div class="alert-error">
+        {{ category_formset.non_form_errors }}
+        {{ order_form.non_field_errors }}
+      </div>
       <div class="fieldWrapper">
         <label for="id_email">Sähköposti:</label>
-        {{ order_form.email }} {{ order_form.email.errors }}
+        {{ order_form.email }}
+        <div class="alert-error">
+          {{ order_form.email.errors }}
+        </div>
       </div>
-      <div class="fieldWrapper">
+<!--      <div class="fieldWrapper">
         {{ order_form.captcha }} {{ order_form.captcha.errors }}
+      </div> -->
+<br/>
+      <div>
+        <input type="submit" value="Tilaa liput" class="btn-primary btn"/>
       </div>
-      <b>HUOM! Palvelu ei ole vielä toiminnassa eikä kelvollisia lippuja ole vielä myynnissä.</b><br />
-      <input type="submit" value="Osta liput" />
       {# {{ order_form }} #}
     </form>
+
+<hr>
+
+      <footer id="footer">
+        <div class="links">
+          
+        </div>
+        Ota yhteyttä <a href="mailto:info@leffalippu.fi">info@leffalippu.fi</a>.
+        <br/>
+
+        Copyright 2013 Jaakko Luttinen.
+
+        Lisenssi <a href="http://www.gnu.org/licenses/agpl-3.0.txt">GNU AGPLv3</a>.
+        Lähdekoodi saatavilla <a href="https://github.com/jluttine/leffalippu.fi/">GitHub</a>-palvelussa.<br/>
+      </footer>
 
 {% endblock %}
 
