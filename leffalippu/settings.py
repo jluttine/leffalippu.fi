@@ -26,12 +26,16 @@ DATABASES = {
 # Email settings. Use dummy settings here, overwrite in local_settings.py
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_ADDRESS = 'info@leffalippu.fi'
+# SMTP:
 #EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 #EMAIL_HOST = 'host.com'
 #EMAIL_PORT = 25
 #EMAIL_HOST_USER = 'username'
 #EMAIL_HOST_PASSWORD = 'password'
 #EMAIL_USE_TLS = False
+# Sendmail:
+#EMAIL_BACKEND = 'leffalippu.sendmail.EmailBackend'
+#SENDMAIL_BIN = 'sendmail' # or use absolute path
 
 
 CRON_CLASSES = [
