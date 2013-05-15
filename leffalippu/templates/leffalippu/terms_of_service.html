@@ -1,0 +1,70 @@
+{% extends "leffalippu/base.html" %}
+
+{% block header %}
+  <h1>Leffalippu.fi käyttöehdot</h1>
+{% endblock %}
+
+{% block content %}
+
+<p>
+Leffalippu.fi välittää yksittäisiä sarjalippuja, jotka on ostettu Finnkinolta ja BioRexiltä.
+</p>
+
+<p>
+Leffalippu.fi myymät Finnkino-liput ovat Finnkinon myymiä tulostettavia sarjalippuja. Niiden käyttöön liittyvät ehdot ja ohjeet löytyvät Finnkinon omilta sivuilta:
+<a href="http://www.finnkino.fi/tickets/buy_vouchers/printable/">http://www.finnkino.fi/tickets/buy_vouchers/printable/</a>
+</p>
+
+<p>
+Leffalippu.fi myymät BioRex-liput ovat BioRexin myymiä sarjalippuja. Niiden käyttöön liittyvät ehdot ja ohjeet löytyvät BioRexin omilta sivuilta:
+<a href="http://www.biorex.fi/info/hinnasto/sarjaliput/">http://www.biorex.fi/info/hinnasto/sarjaliput/</a>
+</p>
+
+<p>
+Asiakkaan tulee ymmärtää ja hyväksyä Finnkinon ja BioRexin lippuihin liittyvät ehdot.
+</p>
+
+<p>
+Leffalippu.fi on vastuussa seuraavista seikoista:
+<ol>
+<li>
+Myytyjen lippujen tiedot (sarjanumero/koodi ja eräpäivä) annetaan sellaisina kuin Finnkino ja BioRex ovat ne ilmoittaneet.
+</li>
+<li>
+Kukin lippu myydään korkeintaan yhdelle asiakkaalle.
+</li>
+</ol>
+Muilta osin Leffalippu.fi ei vastaa myymiensä lippujen kelpoisuudesta Finnkinon tai BioRexin palveluihin. 
+</p>
+
+<p>
+Asiakkaalla on oikeus perua tilauksensa ennen maksua. Kun maksu on suoritettu, lippujen tiedot lähetetään asiakkaalle, eikä tilausta voi enää perua.
+</p>
+
+<p>
+Maksun jälkeen elokuvalippujen sarjanumerot lähetetään asiakkaan ilmoittamaan sähköpostiosoitteeseen. Elokuvaliput voi käyttää pelkkien sarjanumeroiden perusteella, joten on asiakkaan vastuulla, etteivät kolmannet osapuolet saa sarjanumeroita tietoonsa ja täten käytä lippuja.
+</p>
+
+<p>
+Asiakas voi pyytää bitcoineja takaisin seuraavissa tapauksissa:
+<ul>
+<li>
+Mikäli Leffalippu.fi vastaanottaa maksun peruuntuneelle tilaukselle, asiakas voi pyytää maksunsa takaisin.
+</li>
+<li>
+Mikäli Leffalippu.fi vastaanottaa ylisuuren maksun tilaukselle, asiakas voi pyytää ylimenevän osuuden takaisin.
+</li>
+<li>
+Mikäli Leffalippu.fi vastaanottaa vajaan maksun ja tilaus peruuntuu, asiakas voi pyytää maksunsa takaisin.
+</li>
+</ul>
+Kaikki takaisinmaksut käsitellään tapauskohtaisesti manuaalisesti ja suoritetaan bitcoineina asiakkaan ilmoittamaan bitcoin-osoitteeseen.
+</p>
+
+<p>
+Onko sähköpostiosoitteiden tietokanta henkilötietorekisteri?
+</p>
+
+<a href="{% url 'order' %}">Palaa takaisin etusivulle.</a>
+
+{% endblock %}

@@ -16,6 +16,8 @@ urlpatterns = patterns('',
 #url(r'^pay/(?P<order_id>.+)/$', views.pay, name='pay'),
 #url(r'^delete/(?P<order_id>.+)/$', views.delete, name='delete'),
 
+    url(r'^kayttoehdot/$', views.terms_of_service, name='terms_of_service'),
+    
     # NOTE: This URL is hardcoded in bitcoin.py in order to be able to use
     # totally different URLs for the callback (for instance, when using SSL)
     url(r'^callback/(?P<encrypted_pk>.+)/$', bitcoin.callback, name='callback'),

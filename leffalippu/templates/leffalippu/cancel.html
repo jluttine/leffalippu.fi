@@ -2,14 +2,16 @@
 
 {% block content %}
 
+<p>
 {% if order.orderstatus.status == CANCELLED %}
-Tilaus on peruutettu.
+Tilauksesi on peruttu. Tervetuloa uudestaan!
 {% elif order.orderstatus.status == EXPIRED %}
-Tilaus on jo umpeutunut.
+Tilauksesi on peruttu. Tervetuloa uudestaan!
 {% elif order.orderstatus.status == PAID %}
 Tilaus on jo maksettu eikä sitä voi enää perua.
 {% endif %}
+</p>
 
-<a href="{% url 'order' %}">Takaisin etusivulle</a>
+<p><a href="{% url 'order' %}">Palaa takaisin etusivulle.</a></p>
 
 {% endblock %}

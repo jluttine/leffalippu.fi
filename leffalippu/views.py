@@ -49,6 +49,8 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
+def terms_of_service(request):
+    return render(request, 'leffalippu/terms_of_service.html')
     
 #def cancel(request):
 def cancel(request, order_id):

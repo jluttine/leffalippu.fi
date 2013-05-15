@@ -2,18 +2,26 @@
 
 {% block content %}
 
-Tilauksen tiedot:
+<p>Kiitos tilauksestasi!</p>
 
-{{ order.email }}
+<p>
+Tilausvahvistus ja lasku on lähetetty sähköpostiosoitteeseen {{ order.email }}. 
+Maksettuasi laskun bitcoineilla 15 minuutin kuluessa lähetämme elokuvalippusi sähköpostitse.
+Mikäli emme vastaanota maksuasi 15 minuutin kuluessa, tilaus peruuntuu automaattisesti.
+</p>
 
-{% for category in order.tickets_set %}
-{{ category }}
+<p>
+Tilauksen sisältö:
+<ul>
+{% for orderedtickets in order.orderedtickets_set.all %}
+<li>{{ orderedtickets.amount }} x {{ orderedtickets.category }}</li>
 {% endfor %}
+</ul>
+Yhteensä: {{ order.price_in_euros }}€
+</p>
 
-Maksutiedot on lähetetty sähköpostiisi. Suoritettuasi maksun saat lipputiedot sähköpostiisi.
+<p><a href="{% url 'order' %}">Palaa takaisin etusivulle.</a></p>
 
-<p><a href="{% url 'cancel' order.encrypted_pk %}">Peru tilaus</a></p>
-
-<a href="{% url 'order' %}">Takaisin etusivulle</a>
+<p>Voit myös <a href="{% url 'cancel' order.encrypted_pk %}">perua tilauksen</a>.</p>
 
 {% endblock %}

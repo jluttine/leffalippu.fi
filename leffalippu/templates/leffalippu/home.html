@@ -1,20 +1,41 @@
 {% extends "leffalippu/base.html" %}
 
+{% block header %}
+  <h1>Osta leffalippuja edullisesti bitcoineilla</h1>
+{% endblock %}
+
 {% block content %}
-    <h1>Osta leffalippuja edullisesti bitcoineilla</h1>
 
     <div class="alert">HUOM! Palvelu ei ole vielä toiminnassa eikä kelvollisia lippuja ole vielä myynnissä.</div>
+
+    Miten palvelu toimii?
+    <ol>
+      <li>Täytä ja lähetä alla oleva tilauslomake.</li>
+      <li>Maksa sähköpostiisi tullut lasku bitcoineilla 15 minuutin kuluessa.</li>
+      <li>Saat elokuvalippujen sarjanumerot sähköpostiisi lähes välittömästi.</li>
+      <li>Käytä liput <a href="https://www.finnkino.fi/">Finnkinon</a>/<a href="https://www.biorex.fi/">BioRexin</a> omissa nettikaupoissa ennen eräpäivää.</li>
+    </ol>
+    HUOM! Pelkät sarjanumerot riittävät lippujen käyttöön, joten älä anna muiden nähdä niitä.<br /><br />
 
     <form method="post" action="" class="well form-inline">
       {% csrf_token %}
       {{ category_formset.management_form }}
+      <div class="fieldWrapper">
+        <label for="id_email">Sähköposti:</label>
+        {{ order_form.email }}
+        <div class="alert-error">
+          {{ order_form.email.errors }}
+        </div>
+      </div>
+      <br />
       <table class="table">
         <thead>
           <tr>
             <th>Lippu</th>
-            <th>Hinta</th>
-            <th>Määrä</th>
+            <th align="center">Hinta</th>
+            <th align="center">Määrä</th>
             <th>Saatavilla</th>
+            <th>Eräpäivä aikaisintaan</th>
           </tr>
         </thead>
         <tbody>
@@ -42,7 +63,8 @@
               {{ form.amount.errors }}{{ form.non_field_errors }}
             </div>
             </td>
-            <td>{{ form.fields.amount.available }}</td>
+            <td align="center">{{ form.fields.amount.available }}</td>
+            <td></td>
           </tr>
           {% endfor %}
         </tbody>
@@ -63,10 +85,12 @@
         {{ order_form.non_field_errors }}
       </div>
       <div class="fieldWrapper">
-        <label for="id_email">Sähköposti:</label>
-        {{ order_form.email }}
+        {{ order_form.terms }}
+        {#<label for="id_terms">#}
+          Ymmärrän ja hyväksyn <a href="{% url 'terms_of_service' %}">käyttöehdot</a>.
+        {#</label>#}
         <div class="alert-error">
-          {{ order_form.email.errors }}
+          {{ order_form.terms.errors }}
         </div>
       </div>
 <!--      <div class="fieldWrapper">
@@ -79,20 +103,8 @@
       {# {{ order_form }} #}
     </form>
 
-<hr>
 
-      <footer id="footer">
-        <div class="links">
-          
-        </div>
-        Ota yhteyttä <a href="mailto:info@leffalippu.fi">info@leffalippu.fi</a>.
-        <br/>
-
-        Copyright 2013 Jaakko Luttinen.
-
-        Lisenssi <a href="http://www.gnu.org/licenses/agpl-3.0.txt">GNU AGPLv3</a>.
-        Lähdekoodi saatavilla <a href="https://github.com/jluttine/leffalippu.fi/">GitHub</a>-palvelussa.<br/>
-      </footer>
+<a href="https://bittiraha.fi">Bittiraha.fi</a>-sivustolla selitetään, <a href="https://bittiraha.fi/content/mik%C3%A4-bitcoin">mitä ovat bitcoinit</a> ja <a href="https://bittiraha.fi/content/miten-bitcoinia-k%C3%A4ytet%C3%A4%C3%A4n">miten niitä käytetään</a>.
 
 {% endblock %}
 

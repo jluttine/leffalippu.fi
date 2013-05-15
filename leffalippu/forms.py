@@ -37,6 +37,8 @@ class OrderForm(forms.ModelForm):
 
     ## captcha = ReCaptchaField(attrs={'theme': 'clean',
     ##                                 'lang': 'fi'})
+
+    terms = forms.BooleanField()
     
     class Meta:
         model = Order
