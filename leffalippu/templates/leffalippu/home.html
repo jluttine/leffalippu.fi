@@ -85,9 +85,11 @@
         {{ order_form.non_field_errors }}
       </div>
       <div class="fieldWrapper">
-        {{ order_form.terms }}
+        <label class="checkbox">
+          {{ order_form.terms }}
         {#<label for="id_terms">#}
           Ymmärrän ja hyväksyn <a href="{% url 'terms_of_service' %}">käyttöehdot</a>.
+        </label>
         {#</label>#}
         <div class="alert-error">
           {{ order_form.terms.errors }}
