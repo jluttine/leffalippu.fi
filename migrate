@@ -1,4 +1,0 @@
-#!/bin/sh
-
-./manage.py schemamigration leffaliput --auto
-./manage.py migrate leffaliput

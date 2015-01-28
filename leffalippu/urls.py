@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 from leffalippu import views
-from leffalippu import bitcoin
+#from leffalippu import bitcoin
 
 # Uncomment the next two lines to enable the admin:
 #from leffalippu import admin
@@ -18,9 +18,11 @@ urlpatterns = patterns('',
 
     url(r'^kayttoehdot/$', views.terms_of_service, name='terms_of_service'),
     
+    url(r'^accounts/', include('registration.backends.simple.urls')),
+    
     # NOTE: This URL is hardcoded in bitcoin.py in order to be able to use
     # totally different URLs for the callback (for instance, when using SSL)
-    url(r'^callback/(?P<encrypted_pk>.+)/$', bitcoin.callback, name='callback'),
+    #url(r'^callback/(?P<encrypted_pk>.+)/$', bitcoin.callback, name='callback'),
 #url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
 #url(r'^$', views.OrderView.as_view(), name='order'),
     # url(r'^leffalippu/', include('leffalippu.foo.urls')),

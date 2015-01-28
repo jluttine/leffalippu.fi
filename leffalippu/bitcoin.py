@@ -1,3 +1,6 @@
+
+raise Exception("IS THIS MODULE NEEDED?")
+
 import urllib2
 import simplejson
 from django.conf import settings

@@ -10,6 +10,7 @@ SECRET_KEY = 'OVERWRITE_THIS_AND_KEEP_SECRET'
 
 DEBUG = False
 TEMPLATE_DEBUG = False
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 SITE_ID = 1
 
@@ -22,6 +23,9 @@ ADMINS = (
 )
 MANAGERS = ADMINS
 
+REGISTRATION_OPEN = True
+LOGIN_REDIRECT_URL = '/'
+
 # Application definition
 
 ROOT_URLCONF = 'leffalippu.urls'
@@ -30,10 +34,14 @@ WSGI_APPLICATION = 'leffalippu.wsgi.application'
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
+    'django.contrib.sites',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'admin_views',
+    'registration',
+    'leffalippu',
 
     # 'leffalippu.apps.accounts',
 )
@@ -72,13 +80,13 @@ TEMPLATE_DIRS = (
 # Database
 
 # Internationalization
-LANGUAGE_CODE = 'cs-cz'
+LANGUAGE_CODE = 'fi'
 LANGUAGES = (
-    'cs', gettext_noop('Czech'),
+    'fi', gettext_noop('Finnish'),
     'en', gettext_noop('English'),
 )
 
-TIME_ZONE = 'Europe/Prague'
+TIME_ZONE = 'Europe/Helsinki'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True

@@ -1,3 +1,6 @@
+
+raise Exception("IS THIS MODULE NEEDED?")
+
 # https://gist.github.com/treyhunner/735861#file-models-py
 
 # This code is under the MIT license.

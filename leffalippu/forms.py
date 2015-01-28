@@ -23,13 +23,13 @@ from django.forms.forms import NON_FIELD_ERRORS
 
 from leffalippu.models import Order, Category, OrderedTickets
 
-from captcha.fields import ReCaptchaField
+#from captcha.fields import ReCaptchaField
 #from captcha.fields import CaptchaField
 
 # debugging
 import inspect
 
-import bitcoin
+#import bitcoin
 
 MAX_AMOUNT = 5
 

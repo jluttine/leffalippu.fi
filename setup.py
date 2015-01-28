@@ -15,5 +15,7 @@ setup(
 
     install_requires=(
         'django>=1.7',
+        'django_admin_views>=0.1.4', # you may need to get the latest dev from github
+        'django-registration-redux',
     )
 )

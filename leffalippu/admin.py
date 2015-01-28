@@ -94,7 +94,8 @@ class OrderAdmin(AdminViews):
         ('Manager', 'manager'),
         )
 
-    list_display = ('encrypted_pk',
+    list_display = ('pk',
+                    #'encrypted_pk',
                     'date', 
                     'email',
     #'ip',

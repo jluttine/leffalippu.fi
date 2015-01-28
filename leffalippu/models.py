@@ -26,44 +26,44 @@ from django.db import models
 
 from django.db.models import Count, Sum, Q
 
-import encrypted_models
+#import encrypted_models
 
-from mail_templated import send_mail
+#from mail_templated import send_mail
 
 from django.conf import settings
 
 # A cron job for finding expired orders.
 # Add to crontab: python manage.py runcrons
-from django_cron import CronJobBase, Schedule
-from mail_templated import send_mail
+#from django_cron import CronJobBase, Schedule
+#from mail_templated import send_mail
 import datetime
 from django.utils import timezone
 
-class ExpirationCronJob(CronJobBase):
-    RUN_EVERY_MINS = 1 # every minute
+## class ExpirationCronJob(CronJobBase):
+##     RUN_EVERY_MINS = 1 # every minute
 
-    schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
-    code = 'leffalippu.check_expiration'    # a unique code
+##     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
+##     code = 'leffalippu.check_expiration'    # a unique code
 
-    def do(self):
-        now = timezone.now()
-        delta = datetime.timedelta(0, 60*settings.EXPIRATION_MINUTES)
-        earliest_date = now - delta
-        expired_orders = Order.objects.filter(orderstatus=None,date__lt=earliest_date)
-        for order in expired_orders:
-            try:
-                expired_status = OrderStatus(order=order, 
-                                             status=OrderStatus.EXPIRED)
-                expired_status.save()
-                send_mail('email/expire.txt',
-                          {
-                              'order': order,
-                              'EMAIL_ADDRESS': settings.EMAIL_ADDRESS,
-                          },
-                          settings.EMAIL_ADDRESS,
-                          [order.email])
-            except:
-                pass
+##     def do(self):
+##         now = timezone.now()
+##         delta = datetime.timedelta(0, 60*settings.EXPIRATION_MINUTES)
+##         earliest_date = now - delta
+##         expired_orders = Order.objects.filter(orderstatus=None,date__lt=earliest_date)
+##         for order in expired_orders:
+##             try:
+##                 expired_status = OrderStatus(order=order, 
+##                                              status=OrderStatus.EXPIRED)
+##                 expired_status.save()
+##                 ## send_mail('email/expire.txt',
+##                 ##           {
+##                 ##               'order': order,
+##                 ##               'EMAIL_ADDRESS': settings.EMAIL_ADDRESS,
+##                 ##           },
+##                 ##           settings.EMAIL_ADDRESS,
+##                 ##           [order.email])
+##             except:
+##                 pass
         
     
 ## class CategoryManager(models.Manager):
@@ -119,8 +119,8 @@ class Category(models.Model):
         
         
 
-class OrderManager(encrypted_models.EncryptedPKModelManager):
-    pass
+## class OrderManager(encrypted_models.EncryptedPKModelManager):
+##     pass
 
     ## def create_order(self, email):
     ##     # Send email with payment instructions
@@ -131,7 +131,8 @@ class OrderManager(encrypted_models.EncryptedPKModelManager):
     ##     # been paid..
     ##     pass
 
-class Order(encrypted_models.EncryptedPKModel):
+class Order(models.Model):
+#class Order(encrypted_models.EncryptedPKModel):
     """
     Class for handling ordering of tickets.
 
@@ -141,7 +142,7 @@ class Order(encrypted_models.EncryptedPKModel):
     """
 
     """ Object manager for encrypted PKs """
-    objects = OrderManager()
+    #objects = OrderManager()
 
     """ Timestamp of the order placement """
     date = models.DateTimeField(auto_now_add=True)
@@ -234,14 +235,14 @@ class Order(encrypted_models.EncryptedPKModel):
                     raise Exception("Serious bug in the system. Not enough tickets given to the customer.")
 
             tickets = Ticket.objects.filter(paidticket__orderstatus=orderstatus)
-            send_mail('email/pay.txt',
-                      {
-                          'order': self,
-                          'tickets': tickets,
-                          'EMAIL_ADDRESS': settings.EMAIL_ADDRESS,
-                      },
-                      settings.EMAIL_ADDRESS,
-                      [self.email])
+            ## send_mail('email/pay.txt',
+            ##           {
+            ##               'order': self,
+            ##               'tickets': tickets,
+            ##               'EMAIL_ADDRESS': settings.EMAIL_ADDRESS,
+            ##           },
+            ##           settings.EMAIL_ADDRESS,
+            ##           [self.email])
 
 class OrderedTickets(models.Model):
     """

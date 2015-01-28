@@ -1,3 +1,6 @@
+
+raise Exception("IS THIS MODULE NEEDED?")
+
 import struct
 from Crypto.Cipher import DES
 

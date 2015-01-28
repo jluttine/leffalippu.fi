@@ -29,7 +29,7 @@ from django.forms.formsets import formset_factory
 from django.core.urlresolvers import reverse
 
 #from django.core import mail
-from mail_templated import send_mail
+#from mail_templated import send_mail
 
 from django.conf import settings
 
@@ -72,13 +72,13 @@ def cancel(request, order_id):
         except:
             raise Exception("Order could not be cancelled. Handle this situation.")
 
-        send_mail('email/cancel.txt',
-                  {
-                      'order': order,
-                      'EMAIL_ADDRESS': settings.EMAIL_ADDRESS,
-                  },
-                  settings.EMAIL_ADDRESS,
-                  [order.email])
+        ## send_mail('email/cancel.txt',
+        ##           {
+        ##               'order': order,
+        ##               'EMAIL_ADDRESS': settings.EMAIL_ADDRESS,
+        ##           },
+        ##           settings.EMAIL_ADDRESS,
+        ##           [order.email])
         
     return render(request,
                   'leffalippu/cancel.html',
@@ -173,14 +173,14 @@ def order(request):
                 # Order succesfull. Send email and show summary
                 CANCEL_URL = reverse('cancel', args=[order.encrypted_pk])
                 CANCEL_URL = request.build_absolute_uri(CANCEL_URL)
-                send_mail('email/order.txt',
-                          {
-                              'order': order,
-                              'CANCEL_URL': CANCEL_URL,
-                              'EMAIL_ADDRESS': settings.EMAIL_ADDRESS,
-                          },
-                          settings.EMAIL_ADDRESS,
-                          [order.email])
+                ## send_mail('email/order.txt',
+                ##           {
+                ##               'order': order,
+                ##               'CANCEL_URL': CANCEL_URL,
+                ##               'EMAIL_ADDRESS': settings.EMAIL_ADDRESS,
+                ##           },
+                ##           settings.EMAIL_ADDRESS,
+                ##           [order.email])
                 return render(request,
                               'leffalippu/order.html',
                               {
